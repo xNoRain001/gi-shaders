@@ -17,7 +17,8 @@ from ..libs.blender_utils import (
   get_selected_object,
   get_operator,
   get_active_object,
-  get_object_
+  get_object_,
+  report_warning
 )
 
 def append_node_tree (filepath, node_group_name = ''):
@@ -299,7 +300,7 @@ def init_outlines (images_with_category, textures_dir, materials_dir, outlines_p
   add_nodes_modifier()
   # TODO: 提供一个性能模式选项，用户可以选择是否删除原始的 Outline 材质
 
-def init_global_shadow (materials_path, post_processing_path, mesh_name):
+def init_global_shadow (materials_path, post_processing_path, mesh_name, armature_name, head_bone_name):
   def append_objects (materials_path, mesh_name):
     collection = create_collection('Global_Shadow')
    
@@ -359,19 +360,14 @@ def init_global_shadow (materials_path, post_processing_path, mesh_name):
     links.new(render_layers.outputs[0], post_processing.inputs[0])
     links.new(post_processing.outputs[0], composite.inputs[0])
 
-  def head_origin_add_child_of ():
-    # TODO:
-    arm_name = '荧_arm'
-    head_origin = get_object('Head Origin')
-    constraint = head_origin.constraints.new(type='CHILD_OF')
-    arm = get_object(arm_name)
+  def head_origin_add_child_of (armature_name, head_bone_name):
+    head_origin = get_object_('Head Origin')
+    # head origin 内部预先定义了一个
+    constraint = head_origin.constraints.get('Child Of')
+    arm = get_object_(armature_name)
     constraint.target = arm
-    active_object_(arm)
-    set_mode('EDIT')
-    constraint.subtarget = 'head'
-    active_object_(head_origin)
-    # 设置反向
-    get_ops().constraint.childof_set_inverse(constraint='子级', owner='OBJECT')
+    constraint.subtarget = head_bone_name
+    constraint.inverse_matrix = constraint.target.matrix_world.inverted()
 
   append_objects(materials_path, mesh_name)
   append_node_tree(post_processing_path)
@@ -380,9 +376,7 @@ def init_global_shadow (materials_path, post_processing_path, mesh_name):
   connect_node_group()
   # 3D视图 视图着色方式 渲染模式下 开启总是
   # bpy.context.space_data.shading.use_compositor = 'ALWAYS'
-  # 关闭辉光
-  # bpy.context.scene.eevee.use_bloom = False
-  # head_origin_add_child_of()
+  head_origin_add_child_of(armature_name, head_bone_name)
 
 def init_hair_shadow ():
   # 需要做到随光线变化 + 面部阴影融合
@@ -432,13 +426,18 @@ def init_hair_shadow ():
 def init_eye_transparent ():
   return
 
-def before ():
+def before (self, mesh_name):
+  passing = None
   set_mode('OBJECT')
-  passing = True
-  object = get_active_object()
-  
-  if object.type != 'MESH':
+  mesh = get_object_(mesh_name)
+  # TODO: 检查 head bone 是否存在
+
+  if mesh:
+    passing = True
+    active_object_(get_object_(mesh_name))
+  else:
     passing = False
+    report_warning(self, f'{ mesh_name } 不存在')
 
   return passing
 
@@ -465,26 +464,27 @@ class Render (get_operator()):
   materials_path = os.path.join(dir, '../assets/HoYoverse - Genshin Impact v3.4.blend')
 
   def execute(self, context):
+    scene = context.scene
     my_tool = context.scene.my_tool
-    passing = before()
+    mesh_name = scene.mesh_name
+    armature_name = scene.armature_name
+    head_bone_name = scene.head_bone_name
+    passing = before(self, mesh_name)
 
-    if not passing:
-      self.report({'WARNING'}, "选择了错误的对象")
-
-    materials_map = gen_materials_map(my_tool)
-    # return {'FINISHED'}
-    mesh_name = get_selected_object().name
-    textures_dir = transform_path(my_tool.textures_dir)
-    materials_dir = transform_path(my_tool.materials_dir)
-    post_processing_path = self.post_processing_path
-    outlines_path = self.outlines_path
-    materials_path = self.materials_path
-    body_type = context.scene.body_type
-    images_with_category = init_textures(textures_dir, materials_path, body_type, materials_map)
-    init_global_shadow(materials_path, post_processing_path, mesh_name)
-    init_outlines(images_with_category, textures_dir, materials_dir, outlines_path, mesh_name)
-    # TODO: 眼透 刘海阴影
-    # init_hair_shadow()
-    # init_eye_transparent()
+    if passing:
+      materials_map = gen_materials_map(my_tool)
+      # return {'FINISHED'}
+      textures_dir = transform_path(my_tool.textures_dir)
+      materials_dir = transform_path(my_tool.materials_dir)
+      post_processing_path = self.post_processing_path
+      outlines_path = self.outlines_path
+      materials_path = self.materials_path
+      body_type = context.scene.body_type
+      images_with_category = init_textures(textures_dir, materials_path, body_type, materials_map)
+      init_global_shadow(materials_path, post_processing_path, mesh_name, armature_name, head_bone_name)
+      init_outlines(images_with_category, textures_dir, materials_dir, outlines_path, mesh_name)
+      # TODO: 眼透 刘海阴影
+      # init_hair_shadow()
+      # init_eye_transparent()
 
     return {'FINISHED'}
