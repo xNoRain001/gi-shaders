@@ -444,18 +444,18 @@ def before (self, mesh_name):
 def transform_path (v):
   return os.path.abspath(get_path().abspath(v))
 
-def gen_materials_map (my_tool):
+def gen_materials_map (file_config):
   types = ['face', 'body', 'hair']
   materials_map = {}
 
   for type in types:
-    for file_path in getattr(my_tool, f'{ type }_files_path'):
+    for file_path in getattr(file_config, f'{ type }_files_path'):
       filename = os.path.basename(file_path.name)
       materials_map[filename] = type
 
   return materials_map
 
-class Render (get_operator()):
+class OBJECT_OT_render (get_operator()):
   bl_idname = 'object.render'
   bl_label = 'Render'
   dir = os.path.dirname(os.path.abspath(__file__))
@@ -465,17 +465,17 @@ class Render (get_operator()):
 
   def execute(self, context):
     scene = context.scene
-    my_tool = context.scene.my_tool
+    file_config = context.scene.file_config
     mesh_name = scene.mesh_name
     armature_name = scene.armature_name
     head_bone_name = scene.head_bone_name
     passing = before(self, mesh_name)
 
     if passing:
-      materials_map = gen_materials_map(my_tool)
+      materials_map = gen_materials_map(file_config)
       # return {'FINISHED'}
-      textures_dir = transform_path(my_tool.textures_dir)
-      materials_dir = transform_path(my_tool.materials_dir)
+      textures_dir = transform_path(file_config.textures_dir)
+      materials_dir = transform_path(file_config.materials_dir)
       post_processing_path = self.post_processing_path
       outlines_path = self.outlines_path
       materials_path = self.materials_path

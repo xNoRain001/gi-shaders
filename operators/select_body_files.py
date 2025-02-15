@@ -6,8 +6,8 @@ from ..libs.blender_utils import (
 
 from bpy_extras.io_utils import ImportHelper
 
-class Select_Body_Files (get_operator(), ImportHelper):
-  bl_idname = "wm.select_body_files"
+class OBJECT_OT_select_body_files (get_operator(), ImportHelper):
+  bl_idname = "object.select_body_files"
   bl_label = "Select Body Files"
   bl_options = {'REGISTER', 'UNDO'}
 
@@ -16,11 +16,11 @@ class Select_Body_Files (get_operator(), ImportHelper):
 
   def execute(self, context):
     scene = context.scene
-    mytool = scene.my_tool
+    file_config = scene.file_config
 
-    mytool.body_files_path.clear()
+    file_config.body_files_path.clear()
     for file in self.files:
-      item = mytool.body_files_path.add()
+      item = file_config.body_files_path.add()
       item.name = self.directory + file.name
 
     return {'FINISHED'}

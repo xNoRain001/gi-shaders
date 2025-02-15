@@ -6,8 +6,8 @@ from ..libs.blender_utils import (
 
 from bpy_extras.io_utils import ImportHelper
 
-class Select_Face_Files (get_operator(), ImportHelper):
-  bl_idname = "wm.select_face_files"
+class OBJECT_OT_select_face_files (get_operator(), ImportHelper):
+  bl_idname = "object.select_face_files"
   bl_label = "Select Face Files"
   bl_options = {'REGISTER', 'UNDO'}
 
@@ -16,11 +16,11 @@ class Select_Face_Files (get_operator(), ImportHelper):
 
   def execute(self, context):
     scene = context.scene
-    mytool = scene.my_tool
+    file_config = scene.file_config
 
-    mytool.face_files_path.clear()
+    file_config.face_files_path.clear()
     for file in self.files:
-      item = mytool.face_files_path.add()
+      item = file_config.face_files_path.add()
       item.name = self.directory + file.name
 
     return {'FINISHED'}

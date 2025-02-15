@@ -1,16 +1,16 @@
-from .reload_addon import Reload_Addon
-from .render import Render
+from .reload_addon import OBJECT_OT_reload_addon
+from .render import OBJECT_OT_render
 from ..libs.blender_utils import register_classes, unregister_classes, add_scene_custom_prop
-from .select_body_files import Select_Body_Files
-from .select_face_files import Select_Face_Files
-from .select_hair_files import Select_Hair_Files
+from .select_body_files import OBJECT_OT_select_body_files
+from .select_face_files import OBJECT_OT_select_face_files
+from .select_hair_files import OBJECT_OT_select_hair_files
 
 classes = (
-  Reload_Addon,
-  Render,
-  Select_Body_Files, 
-  Select_Face_Files, 
-  Select_Hair_Files
+  OBJECT_OT_reload_addon,
+  OBJECT_OT_render,
+  OBJECT_OT_select_body_files, 
+  OBJECT_OT_select_face_files, 
+  OBJECT_OT_select_hair_files
 )
 
 def register():
