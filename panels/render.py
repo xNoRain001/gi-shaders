@@ -49,9 +49,9 @@ class VIEW3D_PT_render (get_panel()):
     add_row_with_label(layout, 'Material 目录（用于描边颜色）:', file_config, 'materials_dir', factor)
  
     row = layout.row()
-    row.operator("wm.select_face_files")
-    row.operator("wm.select_body_files")
-    row.operator("wm.select_hair_files")
+    row.operator("object.select_face_files")
+    row.operator("object.select_body_files")
+    row.operator("object.select_hair_files")
     row = layout.row()
     col = row.column()
     for file_path in file_config.face_files_path:

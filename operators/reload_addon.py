@@ -2,12 +2,12 @@ import sys
 from ..libs.blender_utils import get_operator, get_ops
 
 # Debug
-class OBJECT_OT_reload_addon (get_operator()):
-  bl_idname = "object.reload_addon"
+class OBJECT_OT_reload_gi_render_addon (get_operator()):
+  bl_idname = "object.reload_gi_render_addon"
   bl_label = "Reload Addon"
 
   def execute(self, context):
-    addon_name = 'gi_render'
+    addon_name = 'gi-render'
     addon_modules = [m for m in sys.modules if m.startswith(addon_name)]
     # 清空缓存
     for module_name in addon_modules:

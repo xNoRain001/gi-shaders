@@ -232,12 +232,27 @@ def init_outlines (images_with_category, textures_dir, materials_dir, outlines_p
       data = json.load(file)
 
     colors = data.get('m_SavedProperties')['m_Colors']
-    outline_color = colors['_OutlineColor']
-    outline_color2 = colors['_OutlineColor2']
-    outline_color3 = colors['_OutlineColor3']
-    outline_color4 = colors['_OutlineColor4']
-    outline_color5 = colors['_OutlineColor5']
-    # outline_width = saved_properties['m_Floats']['_OutlineWidth']
+    
+    # 有两种形式
+    if isinstance(colors, list):
+      for item in colors:
+        if item['Key'] == '_OutlineColor':
+          outline_color = item['Value']
+        elif item['Key'] == '_OutlineColor2':
+          outline_color2 = item['Value']
+        elif item['Key'] == '_OutlineColor3':
+          outline_color3 = item['Value']
+        elif item['Key'] == '_OutlineColor4':
+          outline_color4 = item['Value']
+        elif item['Key'] == '_OutlineColor5':
+          outline_color5 = item['Value']
+    else:
+      outline_color = colors['_OutlineColor']
+      outline_color2 = colors['_OutlineColor2']
+      outline_color3 = colors['_OutlineColor3']
+      outline_color4 = colors['_OutlineColor4']
+      outline_color5 = colors['_OutlineColor5']
+      # outline_width = saved_properties['m_Floats']['_OutlineWidth']
 
     return [
       outline_color['r'], outline_color['g'], outline_color['b'], outline_color['a'],
