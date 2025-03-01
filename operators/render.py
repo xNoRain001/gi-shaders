@@ -45,6 +45,9 @@ def init_textures (textures_dir, materials_path, body_type, materials_map):
       'Hair-Body_Diffuse_UV0': '',
       'Hair-Body_Lightmap_UV0': '',
       'Hair-Body_Normalmap_UV0': '',
+      # 'Hair-Hair_Diffuse_UV0': '',
+      # 'Hair-Hair_Lightmap_UV0': '',
+      # 'Hair-Hair_Normalmap_UV0': '',
       'Hair-Hair_Shadow_Ramp': ''
     }
 
@@ -60,6 +63,12 @@ def init_textures (textures_dir, materials_path, body_type, materials_map):
           images_with_category['Body-Body_Normalmap_UV0'] = file
         elif file.endswith('Body_Shadow_Ramp.png'):
           images_with_category['Body-Body_Shadow_Ramp'] = file
+        # elif file.endswith('Hair_Diffuse.png'):
+        #   images_with_category['Hair-Hair_Diffuse_UV0'] = file
+        # elif file.endswith('Hair_Lightmap.png'):
+        #   images_with_category['Hair-Hair_Lightmap_UV0'] = file
+        # elif file.endswith('Hair_Normalmap.png'):
+        #   images_with_category['Hair-Hair_Normalmap_UV0'] = file
         elif file.endswith('Hair_Diffuse.png'):
           images_with_category['Hair-Body_Diffuse_UV0'] = file
         elif file.endswith('Hair_Lightmap.png'):
@@ -81,6 +90,8 @@ def init_textures (textures_dir, materials_path, body_type, materials_map):
       # Hair_Shadow_Ramp => Hair Shadow Ramp
       node = get_data().node_groups.get(type2.replace('_', ' ')).nodes.get(type2)
     else:
+      print(type1)
+      print(type2)
       node = material.node_tree.nodes[type2] 
 
     if type1 == 'Face':

@@ -4,7 +4,7 @@ class VIEW3D_PT_reload_gi_render_addon (get_panel()):
   bl_space_type = 'VIEW_3D'
   bl_region_type = 'UI'
   bl_category = 'Item'
-  bl_label = "Reload Addon"
+  bl_label = "Reload GI Render Addon"
   bl_idname = "VIEW3D_PT_reload_gi_render_addon"
 
   def draw(self, context):
