@@ -8,15 +8,15 @@ from ..libs.blender_utils import (
   get_data,
   get_object_
 )
-from ..operators import OBJECT_OT_render
+from ..operators import OBJECT_OT_shaders
 from ..const import bl_category
 
-class VIEW3D_PT_render (get_panel()):
+class VIEW3D_PT_shaders (get_panel()):
   bl_space_type = 'VIEW_3D'
   bl_region_type = 'UI'
   bl_category = bl_category
-  bl_label = "GI Render"
-  bl_idname = "VIEW3D_PT_render"
+  bl_label = "Shaders"
+  bl_idname = "VIEW3D_PT_Shaders"
 
   def draw(self, context):
     layout = self.layout
@@ -33,4 +33,4 @@ class VIEW3D_PT_render (get_panel()):
       row.prop_search(scene, "head_bone_name", armature.data, 'bones', text = '头')
 
     row = layout.row()
-    row.operator(OBJECT_OT_render.bl_idname, text = 'Render')
+    row.operator(OBJECT_OT_shaders.bl_idname, text = 'Render')

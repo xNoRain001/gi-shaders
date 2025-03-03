@@ -1,10 +1,10 @@
-from .reload_addon import VIEW3D_PT_reload_gi_render_addon
+from .reload_addon import VIEW3D_PT_reload_gi_shaders_addon
 from ..libs.blender_utils import register_classes, unregister_classes, add_scene_custom_prop
-from .render import VIEW3D_PT_render
+from .shaders import VIEW3D_PT_shaders
 
 classes = (
-  VIEW3D_PT_reload_gi_render_addon,
-  VIEW3D_PT_render
+  VIEW3D_PT_reload_gi_shaders_addon,
+  VIEW3D_PT_shaders
 )
 
 def register():

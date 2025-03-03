@@ -1,22 +1,20 @@
-from os import path, remove, listdir
+from os import remove, listdir
+from os.path import join, isdir, dirname, abspath, splitext
 
-join = path.join
-dirname = path.dirname
-abspath = path.abspath
-splitext = path.splitext
-
-def remove_fbx ():
-  base = join(dirname(abspath(__file__)), '../assets/textures')
+def remove_fbx (base): 
   dirs = listdir(base)
-  
+
   for dir in dirs:
-    _base = join(base, f'./{ dir }')
-    file_names = listdir(_base)
+    _base = join(base, dir)
 
-    for file_name in file_names:
-      _, file_extension = splitext(file_name)
-      
+    if isdir(_base):
+      remove_fbx(_base)
+    else:
+      _, file_extension = splitext(dir)
+        
       if file_extension == '.fbx':
-        remove(join(_base, file_name))
+        remove(_base)
 
-remove_fbx()
+        
+dir = join(dirname(abspath(__file__)), '../assets/textures')
+remove_fbx(dir)
