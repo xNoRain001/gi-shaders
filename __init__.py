@@ -1,5 +1,7 @@
+# pip install blender_utils --target "C:\Users\xNoRain\AppData\Roaming\Blender Foundation\Blender\4.2\scripts\addons\gi_render\libs"
+
 bl_info = {
-  "name": "GI Render",
+  "name": "GI Shaders",
   "blender": (4, 2, 3),
   "category": "Object",
 }

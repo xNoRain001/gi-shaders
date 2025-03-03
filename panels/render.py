@@ -9,11 +9,12 @@ from ..libs.blender_utils import (
   get_object_
 )
 from ..operators import OBJECT_OT_render
+from ..const import bl_category
 
 class VIEW3D_PT_render (get_panel()):
   bl_space_type = 'VIEW_3D'
   bl_region_type = 'UI'
-  bl_category = "Item"
+  bl_category = bl_category
   bl_label = "GI Render"
   bl_idname = "VIEW3D_PT_render"
 
