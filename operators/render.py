@@ -1,5 +1,7 @@
 import os
 import json
+from os import path, listdir
+from ..const import texture_dir as tex_dir
 
 from ..libs.blender_utils import (
   get_object, 
@@ -18,8 +20,43 @@ from ..libs.blender_utils import (
   get_operator,
   get_active_object,
   get_object_,
-  report_warning
+  report_warning,
+  report_error
 )
+
+join = path.join
+abspath = path.abspath
+dirname = path.dirname
+
+dir = dirname(abspath(__file__))
+material_path = join(dir, '../assets/shaders/HoYoverse - Genshin Impact v3.4.blend')
+outline_path = join(dir, '../assets/shaders/HoYoverse - Genshin Impact Outlines v3.blend')
+post_processing_path = join(dir, '../assets/shaders/HoYoverse - Genshin Impact Post-Processing.blend')
+texture_dir = None
+material_dir = None
+file_prefix = None
+
+# Avatar_Girl_Sword_Furina_Mat_Face
+# Avatar_Girl_Sword_Furina_Mat_Hair
+# Avatar_Girl_Sword_Furina_Mat_Body
+# Avatar_Girl_Sword_Furina_Mat_Dress
+# Avatar_Girl_Sword_Furina_Mat_Effect
+# Avatar_Default_Mat
+prefix = 'HoYoverse - Genshin '
+material_map = {
+  'Face': f'{ prefix }Face',
+  'Hair': f'{ prefix }Hair',
+  'Body': f'{ prefix }Body',
+  'Dress': f'{ prefix }Body',
+  'Effect': f'{ prefix }Effect'
+}
+body_type_map = {
+  'Loli': 1,
+  'Boy': 2,
+  'Girl': 3,
+  'Male': 4,
+  'Lady': 5
+}
 
 def append_node_tree (filepath, node_group_name = ''):
   with get_data().libraries.load(filepath, link = False) as (data_from, data_to):
@@ -28,121 +65,7 @@ def append_node_tree (filepath, node_group_name = ''):
     else:
       data_to.node_groups = data_from.node_groups
 
-def init_textures (textures_dir, materials_path, body_type, materials_map):
-  def add_textures (images_with_category, body_type):
-    for key, value in images_with_category.items():
-      type1, type2 = key.split('-')
-      add_texture(type1, type2, value, textures_dir, body_type)
-
-  def get_images_with_category (textures_dir):
-    files = os.listdir(textures_dir)
-    images_with_category = {
-      'Face-Face_Diffuse': '',
-      'Body-Body_Diffuse_UV0': '',
-      'Body-Body_Lightmap_UV0': '',
-      'Body-Body_Normalmap_UV0': '',
-      'Body-Body_Shadow_Ramp': '',
-      'Hair-Body_Diffuse_UV0': '',
-      'Hair-Body_Lightmap_UV0': '',
-      'Hair-Body_Normalmap_UV0': '',
-      # 'Hair-Hair_Diffuse_UV0': '',
-      # 'Hair-Hair_Lightmap_UV0': '',
-      # 'Hair-Hair_Normalmap_UV0': '',
-      'Hair-Hair_Shadow_Ramp': ''
-    }
-
-    for file in files:
-      if file.endswith('.png'):
-        if file.endswith('Face_Diffuse.png'):
-          images_with_category['Face-Face_Diffuse'] = file
-        elif file.endswith('Body_Diffuse.png'):
-          images_with_category['Body-Body_Diffuse_UV0'] = file
-        elif file.endswith('Body_Lightmap.png'):
-          images_with_category['Body-Body_Lightmap_UV0'] = file
-        elif file.endswith('Body_Normalmap.png'):
-          images_with_category['Body-Body_Normalmap_UV0'] = file
-        elif file.endswith('Body_Shadow_Ramp.png'):
-          images_with_category['Body-Body_Shadow_Ramp'] = file
-        # elif file.endswith('Hair_Diffuse.png'):
-        #   images_with_category['Hair-Hair_Diffuse_UV0'] = file
-        # elif file.endswith('Hair_Lightmap.png'):
-        #   images_with_category['Hair-Hair_Lightmap_UV0'] = file
-        # elif file.endswith('Hair_Normalmap.png'):
-        #   images_with_category['Hair-Hair_Normalmap_UV0'] = file
-        elif file.endswith('Hair_Diffuse.png'):
-          images_with_category['Hair-Body_Diffuse_UV0'] = file
-        elif file.endswith('Hair_Lightmap.png'):
-          images_with_category['Hair-Body_Lightmap_UV0'] = file
-        elif file.endswith('Hair_Normalmap.png'):
-          images_with_category['Hair-Body_Normalmap_UV0'] = file
-        elif file.endswith('Hair_Shadow_Ramp.png'):
-          images_with_category['Hair-Hair_Shadow_Ramp'] = file
-
-    return images_with_category
-
-  def add_texture (type1, type2, value, textures_dir, body_type):
-    material = get_material(f"HoYoverse - Genshin { type1 }")
-    node = None
-
-    if type2 == 'Body_Shadow_Ramp' or type2 == 'Hair_Shadow_Ramp':
-      # Body_Shadow_Ramp 和 Hair_Shadow_Ramp 在节点组内设置贴图
-      # Body_Shadow_Ramp => Body Shadow Ramp
-      # Hair_Shadow_Ramp => Hair Shadow Ramp
-      node = get_data().node_groups.get(type2.replace('_', ' ')).nodes.get(type2)
-    else:
-      print(type1)
-      print(type2)
-      node = material.node_tree.nodes[type2] 
-
-    if type1 == 'Face':
-      # 脸部需要设置阴影的类型
-      # Loli / Boy / Girl / Male / Lady => [1, 5]
-      m = get_material("HoYoverse - Genshin Face")
-      m.node_tree.nodes["Face Shader"].inputs[0].default_value = body_type
-
-    if value:
-      image = get_data().images.load(os.path.join(textures_dir, value))
-  
-      if type2 == 'Body_Lightmap_UV0' or type2 == 'Body_Normalmap_UV0':
-        # 光照贴图和法向贴图的色彩空间要设置为非色彩
-        image.colorspace_settings.name = 'Non-Color'
-      else:
-        # 其他贴图的 Alpha 要设置为通道打包
-        image.alpha_mode = 'CHANNEL_PACKED'
-
-      node.image = image
-    else:
-      # 如果没有对应的贴图，就屏蔽该节点
-      node.mute = True
-
-  def related_materials (materials_map):
-    materials = get_materials()
-
-    for index, material in enumerate(materials):
-      nodes = material.node_tree.nodes
-
-      for node in nodes:
-        # MMD 纹理图片
-        if node.type == 'TEX_IMAGE' and node.name == 'mmd_base_tex':
-          filename = os.path.basename(node.image.filepath)
-          
-          if filename in materials_map:
-            # face | body | hair
-            type = materials_map[filename]
-            materials[index] = get_material(f"HoYoverse - Genshin { type.capitalize() }")
-            
-  def append_materials (materials_path):
-    with get_data().libraries.load(materials_path, link = False) as (data_from, data_to):
-      data_to.materials = data_from.materials
-
-  append_materials(materials_path)
-  images_with_category = get_images_with_category(textures_dir)
-  add_textures(images_with_category, body_type)
-  related_materials(materials_map)
-
-  return images_with_category
-
-def init_outlines (images_with_category, textures_dir, materials_dir, outlines_path, mesh_name):
+def init_outlines (mesh_list):
   def connect_node_group ():
     tree = get_context().scene.node_tree
     nodes = tree.nodes
@@ -157,95 +80,63 @@ def init_outlines (images_with_category, textures_dir, materials_dir, outlines_p
     links.new(post_processing.outputs[0], preview.inputs[0])
 
   def add_nodes_modifier ():
-    context = get_context()
-    modifier_name = 'Nodes Modifier For Outlines'
-    context.object.modifiers.new(type = 'NODES', name = modifier_name)
-    node_group = get_data().node_groups.get("HoYoverse - Genshin Impact Outlines")
-    modifier = context.object.modifiers.get(modifier_name)
-    modifier.node_group = node_group
-    get_ops().object.camera_add(align = 'VIEW')
+    outline_mesh = set(['Body', 'EffectHair', 'Face', 'Face_Eye'])
 
-    # TODO: 手动选择摄像机
-    modifier["Input_4"] = get_object_('摄像机')
-    modifier["Input_10"] = get_material("HoYoverse - Genshin Hair")
-    modifier["Input_5"] = get_material("HoYoverse - Genshin Outlines - Hair")
-    modifier["Input_11"] = get_material("HoYoverse - Genshin Body")
-    modifier["Input_9"] = get_material("HoYoverse - Genshin Outlines - Body")
-    modifier["Input_14"] = get_material("HoYoverse - Genshin Face")
-    modifier["Input_15"] = get_material("HoYoverse - Genshin Outlines - Face")
-    modifier["Input_12"] = True
-    # 描边宽度
-    modifier["Input_7"] = 1.2
+    for mesh in mesh_list:
+      mesh_name = mesh.name
 
-  def copy_material (material_name, outline_material_name, mesh_name):
-    material = get_material(material_name)
-    new_material = material.copy()
-    new_material.name = outline_material_name
-    active_object_(get_object_(mesh_name))
-    get_context().object.data.materials.append(new_material)
+      if mesh_name in outline_mesh:
+        modifier_name = 'Nodes Modifier For Outlines'
+        mesh.modifiers.new(type = 'NODES', name = modifier_name)
+        node_group = get_data().node_groups.get("HoYoverse - Genshin Impact Outlines")
+        modifier = mesh.modifiers.get(modifier_name)
+        modifier.node_group = node_group
 
-    return new_material
+        # 基于几何节点
+        modifier["Input_12"] = True
+        # 描边宽度
+        modifier["Input_7"] = 0.2
 
-  def add_textures (images_with_category, textures_dir, materials_dir):
-    material_name = 'HoYoverse - Genshin Outlines'
-    material_files_with_category = get_material_files_with_category(materials_dir)
+        if mesh_name == 'Body':
+          modifier["Input_11"] = get_material("HoYoverse - Genshin Body")
+          modifier["Input_9"] = get_material("HoYoverse - Genshin Outlines - Body")
+          modifier["Input_18"] = get_material("HoYoverse - Genshin Body")
+          modifier["Input_19"] = get_material("HoYoverse - Genshin Outlines - Dress")
+          modifier["Input_10"] = get_material("HoYoverse - Genshin Hair")
+          modifier["Input_5"] = get_material("HoYoverse - Genshin Outlines - Hair")
+        elif mesh_name == 'EffectHair':
+          modifier["Input_26"] = get_material("HoYoverse - Genshin Effect")
+          modifier["Input_27"] = get_material("HoYoverse - Genshin Outlines - Effect")
+        elif mesh_name == 'Face' or mesh_name == 'Face_Eye':
+          modifier["Input_14"] = get_material("HoYoverse - Genshin Face")
+          modifier["Input_15"] = get_material("HoYoverse - Genshin Outlines - Face")
+        
+  def gen_material_file_map ():
+    file_names = listdir(material_dir)
+    material_file_map = {}
 
-    for key, value in images_with_category.items():
-      if ( 
-        key.endswith('Diffuse') or
-        key.endswith('Diffuse_UV0') or
-        key.endswith('Lightmap_UV0') 
-      ):
-        type1, type2 = key.split('-')
-        outline_material_name = material_name + ' - ' + type1
-        outline_material = get_material(outline_material_name)
+    for file_name in file_names:
+      if file_name.endswith('_Mat_Body.json'):
+        material_file_map['Body'] = file_name
+      elif file_name.endswith('_Mat_Dress.json'):
+        material_file_map['Dress'] = file_name
+      elif file_name.endswith('_Mat_Effect.json'):
+        material_file_map['Effect'] = file_name
+      elif file_name.endswith('_Mat_Face.json'):
+        material_file_map['Face'] = file_name
+      elif file_name.endswith('_Mat_Hair.json'):
+        material_file_map['Hair'] = file_name
 
-        if not outline_material:
-          outline_material = copy_material(
-            material_name, 
-            outline_material_name, 
-            mesh_name
-          )
+    return material_file_map
 
-        add_texture(
-          type1, 
-          type2, 
-          value, 
-          textures_dir, 
-          materials_dir, 
-          material_files_with_category,
-          outline_material
-        )
-
-  def get_material_files_with_category (materials_dir):
-    files = os.listdir(materials_dir)
-    material_files_with_category = {
-      'Body': '',
-      'Dress': '',
-      'Face': '',
-      'Hair': ''
-    }
-
-    for file in files:
-      if file.endswith('Body.json'):
-        material_files_with_category['Body'] = file
-      elif file.endswith('Dress.json'):
-        material_files_with_category['Dress'] = file
-      elif file.endswith('Face.json'):
-        material_files_with_category['Face'] = file
-      elif file.endswith('Hair.json'):
-        material_files_with_category['Hair'] = file
-
-    return material_files_with_category
-
-  def get_outline_color (materials_dir, material_file):
-    with open(os.path.join(materials_dir, material_file), 'r', encoding = 'utf-8') as file:
+  def get_outline_color (type):
+    with open(join(material_dir, f'{ file_prefix }_Mat_{ type }.json'), 'r', encoding = 'utf-8') as file:
       data = json.load(file)
 
     colors = data.get('m_SavedProperties')['m_Colors']
     
-    # 有两种形式
     if isinstance(colors, list):
+      # 有两种形式，一种是 list，每个元素是 dict, 有 Key 和 Value 两个属性
       for item in colors:
         if item['Key'] == '_OutlineColor':
           outline_color = item['Value']
@@ -258,12 +149,12 @@ def init_outlines (images_with_category, textures_dir, materials_dir, outlines_p
         elif item['Key'] == '_OutlineColor5':
           outline_color5 = item['Value']
     else:
+      # 另一种是 dict，直接通过属性获取值
       outline_color = colors['_OutlineColor']
       outline_color2 = colors['_OutlineColor2']
       outline_color3 = colors['_OutlineColor3']
       outline_color4 = colors['_OutlineColor4']
       outline_color5 = colors['_OutlineColor5']
-      # outline_width = saved_properties['m_Floats']['_OutlineWidth']
 
     return [
       outline_color['r'], outline_color['g'], outline_color['b'], outline_color['a'],
@@ -273,64 +164,98 @@ def init_outlines (images_with_category, textures_dir, materials_dir, outlines_p
       outline_color5['r'], outline_color5['g'], outline_color5['b'], outline_color5['a'],
     ]
 
-  def set_outline_color (colors, type1):
+  def gen_outline_materials ():
+    list = ['Body', 'Face', 'Hair']
+    material_name = 'HoYoverse - Genshin Outlines'
+    material = get_material(material_name)
+
+    for item in list:
+      new_material = material.copy()
+      new_material.name = f'{ material_name } - { item }'
+
+  def init_outline_diffuse (type, material):
+    node = material.node_tree.nodes['Outline_Diffuse'] 
+    # colors = get_outline_color(materials_dir, material_files_with_category[type1])
+    # set_outline_color(colors, type1)
+    node_set_image(node, f'{ type }_Diffuse.png', 'CHANNEL_PACKED')
+
+  def init_outline_lightmap (type, material):
+    node = material.node_tree.nodes['Outline_Lightmap'] 
+    node_set_image(node, f'{ type }_Lightmap.png', colorspace_settings = 'Non-Color')
+  
+  def init_outline_color (type, material):
     (
       r, g, b, a,
       r2, g2, b2, a2,
       r3, g3, b3, a3,
       r4, g4, b4, a4,
       r5, g5, b5, a5,
-    ) = colors
-    outline_node = get_data().materials[f"HoYoverse - Genshin Outlines - { type1 }"].node_tree.nodes["Outlines"]
+    ) = get_outline_color(type)
+    outline_node = material.node_tree.nodes["Outlines"]
     outline_node.inputs[15].default_value = (r, g, b, a)
     outline_node.inputs[16].default_value = (r2, g2, b2, a2)
     outline_node.inputs[17].default_value = (r3, g3, b3, a3)
     outline_node.inputs[18].default_value = (r4, g4, b4, a4)
     outline_node.inputs[19].default_value = (r5, g5, b5, a5)
 
-  def add_texture (
-    type1, 
-    type2, 
-    value, 
-    textures_dir, 
-    materials_dir, 
-    material_files_with_category,
-    outline_material
-  ):
-    node_name = 'Outline_Diffuse' if type2.endswith('Diffuse') or type2.endswith('Diffuse_UV0') else 'Outline_Lightmap'
-    node = outline_material.node_tree.nodes[node_name] 
-    colors = get_outline_color(materials_dir, material_files_with_category[type1])
-    set_outline_color(colors, type1)
+  def gen_extra_outline_materials ():
+    # Dress Outline 不复用 Body Outline
+    # Effect Outline 不复用 Hair Outline
+    # 因为描边颜色不同
+    body_outline_material = get_material('HoYoverse - Genshin Outlines - Body')
+    hair_outline_material = get_material('HoYoverse - Genshin Outlines - Hair')
+    dress_outline_material = body_outline_material.copy()
+    dress_outline_material.name = 'HoYoverse - Genshin Outlines - Dress'
+    effect_outline_material = hair_outline_material.copy()
+    effect_outline_material.name = 'HoYoverse - Genshin Outlines - Effect'
 
-    # bpy.data.materials["HoYoverse - Genshin Outlines - Face"].node_tree.nodes["Outlines"].inputs[6].default_value = 0
-    # bpy.data.materials["HoYoverse - Genshin Outlines - Face"].node_tree.nodes["Outlines"].inputs[7].default_value = 0
-    # bpy.data.materials["HoYoverse - Genshin Outlines - Face"].node_tree.nodes["Outlines"].inputs[8].default_value = 0
-    # bpy.data.materials["HoYoverse - Genshin Outlines - Face"].node_tree.nodes["Outlines"].inputs[9].default_value = 0
-    # bpy.data.materials["HoYoverse - Genshin Outlines - Face"].node_tree.nodes["Outlines"].inputs[10].default_value = 1
+    return dress_outline_material, effect_outline_material
 
-    if value:
-      image = get_data().images.load(os.path.join(textures_dir, value))
+  def init_body_outline_material ():
+    material = get_material('HoYoverse - Genshin Outlines - Body')
+    init_outline_diffuse('Body', material)
+    init_outline_lightmap('Body', material)
+    init_outline_color('Body', material)
+
+  def init_hair_outline_material ():
+    material = get_material('HoYoverse - Genshin Outlines - Hair')
+    init_outline_diffuse('Hair', material)
+    init_outline_lightmap('Hair', material)
+    init_outline_color('Hair', material)
   
-      if type2.endswith('Lightmap_UV0'):
-        image.colorspace_settings.name = 'Non-Color'
-      else:
-        image.alpha_mode = 'CHANNEL_PACKED'
+  def init_face_outline_material ():
+    material = get_material('HoYoverse - Genshin Outlines - Face')
+    init_outline_diffuse('Face', material)
+    init_outline_color('Hair', material)
 
-      node.image = image
-    else:
-      node.mute = True
+  def init_outline_materials ():
+    init_body_outline_material()
+    init_hair_outline_material()
+    init_face_outline_material()
 
-  connect_node_group()
-  append_node_tree(outlines_path)
-  add_textures(images_with_category, textures_dir, materials_dir)
+  # 只需要修改颜色
+  def init_extra_outline_materials (dress_outline_material, effect_outline_material):
+    init_outline_color('Dress', dress_outline_material)
+    init_outline_color('Effect', effect_outline_material)
+
+  # connect_node_group()
+  append_node_tree(outline_path)
+  material_file_map = gen_material_file_map()
+  gen_outline_materials()
+  init_outline_materials()
+  dress_outline_material, effect_outline_material = gen_extra_outline_materials()
+  init_extra_outline_materials(dress_outline_material, effect_outline_material)
   add_nodes_modifier()
-  # TODO: 提供一个性能模式选项，用户可以选择是否删除原始的 Outline 材质
-
-def init_global_shadow (materials_path, post_processing_path, mesh_name, armature_name, head_bone_name):
-  def append_objects (materials_path, mesh_name):
+  # TODO: 删除 outline
+  # get_materials().remove(get_material('HoYoverse - Genshin Outlines'))
+  
+def init_global_shadow (mesh_list, armature, head_bone_name):
+  # 追加 head origin 和 light direction
+  def append_objects ():
+    active_object = get_active_object()
     collection = create_collection('Global_Shadow')
    
-    with get_data().libraries.load(materials_path, link = False) as (data_from, data_to):
+    with get_data().libraries.load(material_path, link = False) as (data_from, data_to):
       for name in data_from.objects:
         # Preview 会携带 Face Body Hair Outline 四种在前面已经导入过的材质
         # 如果想导入 Preview 的话，init_textures 中最开始就不用导入材质了
@@ -344,113 +269,35 @@ def init_global_shadow (materials_path, post_processing_path, mesh_name, armatur
         object.hide_set(True)
 
     # 如果不导入 Preview 的话，需要手动追加这个节点组
-    append_node_tree(materials_path, 'Light Vectors')
-    active_object_(get_object_(mesh_name))
+    append_node_tree(material_path, 'Light Vectors')
+    active_object_(active_object)
   
-  def add_nodes_modifier ():
-    context = get_context()
-    data =  get_data()
-    modifier_name = 'Nodes Modifier For Global Shade'
-    context.object.modifiers.new(type = 'NODES', name = modifier_name)
-    node_group = data.node_groups.get("Light Vectors")
-    modifier = context.object.modifiers.get(modifier_name)
-    modifier.node_group = node_group
-    modifier["Input_3"] = data.objects["Light Direction"]
-    modifier["Input_4"] = data.objects["Head Origin"]
-    modifier["Input_5"] = data.objects["Head Forward"]
-    modifier["Input_6"] = data.objects["Head Up"]
+  def add_nodes_modifier (mesh_list):
+    for mesh in mesh_list:
+      data = get_data()
+      node_groups = data.node_groups
+      objects = data.objects
+      modifier_name = 'Nodes Modifier For Global Shadow'
+      mesh.modifiers.new(type = 'NODES', name = modifier_name)
+      modifier = mesh.modifiers.get(modifier_name)
+      modifier.node_group = node_groups.get("Light Vectors")
+      modifier["Input_3"] = objects["Light Direction"]
+      modifier["Input_4"] = objects["Head Origin"]
+      modifier["Input_5"] = objects["Head Forward"]
+      modifier["Input_6"] = objects["Head Up"]
 
-  def add_node_group ():
-    # 确保使用节点编辑器
-    context = get_context()
-    context.scene.use_nodes = True
-    tree = context.scene.node_tree
-    # 获取现有的节点组
-    node_group_name = "HoYoverse - Post Processing"
-    node_group = get_data().node_groups.get(node_group_name)
-    # 添加节点组实例到合成器视图
-    tree.nodes.new(type = 'CompositorNodeGroup').node_tree = node_group
-
-  def connect_node_group():
-    # 确保使用节点编辑器
-    tree = get_context().scene.node_tree
-    nodes = tree.nodes
-    links = tree.links
-
-    composite = nodes[0]
-    render_layers = nodes[1]
-    post_processing = nodes[2]
-    render_layers.location = (0, 0)
-    composite.location = (600, 0)
-    post_processing.location = (300, 0)
-    links.new(render_layers.outputs[0], post_processing.inputs[0])
-    links.new(post_processing.outputs[0], composite.inputs[0])
-
-  def head_origin_add_child_of (armature_name, head_bone_name):
+  def head_origin_add_child_of (armature, head_bone_name):
     head_origin = get_object_('Head Origin')
     # head origin 内部预先定义了一个
     constraint = head_origin.constraints.get('Child Of')
-    arm = get_object_(armature_name)
-    constraint.target = arm
+    constraint.target = armature
     constraint.subtarget = head_bone_name
     constraint.inverse_matrix = constraint.target.matrix_world.inverted()
 
-  append_objects(materials_path, mesh_name)
+  append_objects()
   append_node_tree(post_processing_path)
-  add_nodes_modifier()
-  add_node_group()
-  connect_node_group()
-  # 3D视图 视图着色方式 渲染模式下 开启总是
-  # bpy.context.space_data.shading.use_compositor = 'ALWAYS'
-  head_origin_add_child_of(armature_name, head_bone_name)
-
-def init_hair_shadow ():
-  # 需要做到随光线变化 + 面部阴影融合
-  material = get_material('颜')
-  material.use_nodes = True
-  tree = material.node_tree
-
-  # 摄像机数据
-  camera_data = tree.nodes.new(type="ShaderNodeCameraData")
-  camera_data.location = (0, 0)
-  # 屏幕空间信息
-  screen_space_info = tree.nodes.new(type="ShaderNodeScreenspaceInfo")
-  screen_space_info.location = (100, 0)
-  # 合并 xyz
-  combine_xyz = tree.nodes.new(type="ShaderNodeCombineXYZ")
-  combine_xyz.location = (300, 0)
-  # 矢量运算
-  vector_math = tree.nodes.new(type="ShaderNodeVectorMath")
-  vector_math.location = (400, 0)
-  # 运算节点
-  math = tree.nodes.new(type="ShaderNodeMath")
-  math.location = (500, 0)
-  math.operation = 'SUBTRACT'
-  math2 = tree.nodes.new(type="ShaderNodeMath")
-  math2.location = (600, 0)
-  math2.operation = 'GREATER_THAN'
-  math2.inputs[1].default_value = 0
-  # 材质输出
-  output_material = tree.nodes.new(type="ShaderNodeOutputMaterial")
-  output_material.location = (700, 0)
-  # 混合
-  mix = tree.nodes.new(type="ShaderNodeMix")
-  mix.data_type = 'RGBA'
-  mix.blend_type = 'MULTIPLY'
-
-  links = tree.links
-  links.new(combine_xyz.outputs[0], vector_math.inputs[1])
-  links.new(vector_math.outputs[0], screen_space_info.inputs[0])
-  links.new(camera_data.outputs[0], vector_math.inputs[0])
-  links.new(camera_data.outputs[1], math.inputs[0])
-  links.new(screen_space_info.outputs[1], math.inputs[1])
-  links.new(math.outputs[0], math2.inputs[0])
-  links.new(math2.outputs[0], mix.inputs[0])
-  # links.new(math2.outputs[0], mix.inputs[1])
-  links.new(mix.outputs[0], output_material.inputs[0])
-
-def init_eye_transparent ():
-  return
+  add_nodes_modifier(mesh_list)
+  head_origin_add_child_of(armature, head_bone_name)
 
 def before (self, mesh_name):
   passing = None
@@ -470,47 +317,295 @@ def before (self, mesh_name):
 def transform_path (v):
   return os.path.abspath(get_path().abspath(v))
 
-def gen_materials_map (file_config):
-  types = ['face', 'body', 'hair']
-  materials_map = {}
+def import_materials ():
+  # HoYoverse - Genshin Body
+  # HoYoverse - Genshin Face
+  # HoYoverse - Genshin Hair
+  # HoYoverse - Genshin Outlines
+  with get_data().libraries.load(material_path, link = False) as (data_from, data_to):
+    data_to.materials = data_from.materials
 
-  for type in types:
-    for file_path in getattr(file_config, f'{ type }_files_path'):
-      filename = os.path.basename(file_path.name)
-      materials_map[filename] = type
+def related_materials (armature):
+  objects = armature.children
+  # 收集 mesh，初始化全局光照时给这些 mesh 添加修改器
+  mesh_list = set()
 
-  return materials_map
+  for object in objects:
+    if object.type == 'MESH':
+      materials = object.data.materials
+
+      for index, material in enumerate(materials):
+        suffix = material.name.split('_')[-1]
+
+        if suffix in material_map:
+          mesh_list.add(object)
+          materials[index] = get_material(material_map[suffix])
+
+  return mesh_list
+
+def nodes_set_image (
+  nodes, 
+  image_name, 
+  alpha_mode = None, 
+  colorspace_settings = None
+):
+  for node in nodes:
+    node_set_image(node, image_name, alpha_mode, colorspace_settings)
+
+def node_set_image (
+  node, 
+  image_name, 
+  alpha_mode = None, 
+  colorspace_settings = None
+):
+  if not image_name:
+    node.image = None
+
+    return
+  
+  # 缺少 lightmap，shadow ramp
+  image = get_data().images.get(image_name)
+
+  if not image:
+    image = get_data().images.load(join(texture_dir, f'{ file_prefix }_Tex_{ image_name }'))
+
+  if alpha_mode:
+    image.alpha_mode = 'CHANNEL_PACKED'
+
+  if colorspace_settings:
+    image.colorspace_settings.name = colorspace_settings
+
+  node.image = image
+
+def get_nodes (material, node_name):
+  nodes = material.node_tree.nodes
+
+  # Body_Lightmap_UV0, Body_Lightmap_UV1
+  return nodes[f'{ node_name }0'], nodes[f'{ node_name }1']
+
+def init_face_diffuse (nodes):
+  node_set_image(nodes['Face_Diffuse'], 'Face_Diffuse.png', 'CHANNEL_PACKED')
+
+def init_body_type (nodes):
+  # 设置脸部阴影的类型
+  body_type = body_type_map[file_prefix.split('_')[1]]
+  nodes["Face Shader"].inputs[0].default_value = body_type
+
+def init_shadow_ramp (type):
+  node_name = f'{ type }_Shadow_Ramp'
+  node = get_data().node_groups.get(f'{ type } Shadow Ramp').nodes.get(node_name)
+  node_set_image(node, f'{ node_name }.png', 'CHANNEL_PACKED')
+
+def init_diffuse (material, type):
+  node, node2 = get_nodes(material, f'{ type }_Diffuse_UV')
+  image_name = f'{ type }_Diffuse.png'
+  nodes_set_image([node, node2], image_name, 'CHANNEL_PACKED')
+
+def init_lightmap (material, type):
+  node, node2 = get_nodes(material, f'{ type }_Lightmap_UV')
+  image_name = f'{ type }_Lightmap.png'
+  nodes_set_image([node, node2], image_name, colorspace_settings = 'Non-Color')
+
+def init_normalmap (material, type):
+  node, node2 = get_nodes(material, f'{ type }_Normalmap_UV')
+  image_name = f'{ type }_Normalmap.png'
+  nodes_set_image([node, node2], image_name, colorspace_settings = 'Non-Color')
+
+def reset_uv_map (material):
+  material.node_tree.nodes["UV Map"].uv_map = ""
+
+def init_face_material ():
+  nodes = get_material(f"HoYoverse - Genshin Face").node_tree.nodes
+  init_face_diffuse(nodes)
+  init_body_type(nodes)
+
+def init_body_material ():
+  material = get_material(f"HoYoverse - Genshin Body")
+  init_shadow_ramp('Body')
+  init_diffuse(material, 'Body')
+  init_lightmap(material, 'Body')
+  init_normalmap(material, 'Body')
+  reset_uv_map(material)
+
+def init_hair_material ():
+  material = get_material(f"HoYoverse - Genshin Hair")
+  init_shadow_ramp('Hair')
+  init_diffuse(material, 'Hair')
+  init_lightmap(material, 'Hair')
+  init_normalmap(material, 'Hair')
+  reset_uv_map(material)
+
+def _init_materials ():
+  init_face_material()
+  init_body_material()
+  init_hair_material()
+
+def init_effect_material (material):
+  node, node2 = get_nodes(material, 'Hair_Diffuse_UV')
+  nodes_set_image([node, node2], 'EffectHair_Diffuse.png', 'CHANNEL_PACKED')
+  node, node2 = get_nodes(material, 'Hair_Lightmap_UV')
+  nodes_set_image([node, node2], 'EffectHair_Lightmap.png', colorspace_settings = 'Non-Color')
+  node, node2 = get_nodes(material, 'Hair_Normalmap_UV')
+  nodes_set_image([node, node2], None)
+
+def gen_effect_material ():
+  hair_material = get_material('HoYoverse - Genshin Hair')
+  effect_material = hair_material.copy()
+  effect_material.name = 'HoYoverse - Genshin Effect'
+
+  return effect_material
+
+def init_materials (armature):
+  import_materials()
+  _init_materials()
+  effect_material = gen_effect_material()
+  init_effect_material(effect_material)
+  mesh_list = related_materials(armature)
+
+  return mesh_list
+
+suffix_list = [
+  'Tex_Face_Diffuse.png',
+  'Tex_Body_Diffuse.png',
+  'Tex_Body_Lightmap.png',
+  'Tex_Body_Normalmap.png',
+  'Tex_Body_Shadow_Ramp.png',
+  'Tex_Hair_Diffuse.png',
+  'Tex_Hair_Lightmap.png',
+  'Tex_Hair_Normalmap.png',
+  'Tex_Hair_Shadow_Ramp.png',
+  'Tex_EffectHair_Diffuse.png',
+  'Tex_EffectHair_Lightmap.png'
+]
+
+# Avatar_Girl_Sword_Furina_Tex_Body_Diffuse.png -> Body_Diffuse.png
+def rename_textures ():
+  images = get_data().images
+    
+  for image in images:
+    name = image.name
+
+    for suffix in suffix_list:
+      if name.endswith(suffix):
+        image.name = suffix[4:]
+
+        break
+
+def init_post_processing ():
+  def add_node_group ():
+    # 确保使用节点编辑器
+    context = get_context()
+    context.scene.use_nodes = True
+    tree = context.scene.node_tree
+    # 获取现有的节点组
+    node_group_name = "HoYoverse - Post Processing"
+    node_group = get_data().node_groups.get(node_group_name)
+    # 添加节点组实例到合成器视图
+    tree.nodes.new(type = 'CompositorNodeGroup').node_tree = node_group
+
+  # def connect_node_group():
+  #   # 确保使用节点编辑器
+  #   tree = get_context().scene.node_tree
+  #   nodes = tree.nodes
+  #   links = tree.links
+
+  #   composite = nodes[0]
+  #   render_layers = nodes[1]
+  #   post_processing = nodes[2]
+  #   render_layers.location = (0, 0)
+  #   composite.location = (600, 0)
+  #   post_processing.location = (300, 0)
+  #   links.new(render_layers.outputs[0], post_processing.inputs[0])
+  #   links.new(post_processing.outputs[0], composite.inputs[0])
+
+  def connect_node_group ():
+    tree = get_context().scene.node_tree
+    nodes = tree.nodes
+    links = tree.links
+    composite = nodes[0]
+    render_layers = nodes[1]
+    post_processing = nodes[2]
+    # links.new(render_layers.outputs[1], composite.inputs[1])
+    preview = tree.nodes.new(type = 'CompositorNodeViewer')
+    preview.location = (600, 300)
+    # links.new(render_layers.outputs[1], preview.inputs[1])
+    # links.new(post_processing.outputs[0], preview.inputs[0])
+    links.new(render_layers.outputs[0], post_processing.inputs[0])
+    links.new(post_processing.outputs[0], preview.inputs[0])
+    links.new(post_processing.outputs[0], composite.inputs[0])
+
+  add_node_group()
+  connect_node_group()
+
+def run_checker (self, armature, head_bone_name, avatar):
+  def check_avatar ():
+    passing = True
+
+    if avatar == 'None':
+      passing = False
+      report_error(self, '没有选中角色')
+
+    return passing
+  
+  def check_armature ():
+    passing = True
+
+    if not armature:
+      passing = False
+      report_error(self, '骨架不存在')
+
+    return passing
+  
+  def check_head_bone_name ():
+    passing = True
+
+    if not head_bone_name:
+      passing = False
+      report_error(self, '脸部阴影跟随骨骼不存在')
+
+    return passing
+
+  passing = True
+  checkers = [
+    check_avatar, 
+    check_armature, 
+    check_head_bone_name
+  ]
+
+  for checker in checkers:
+    passing = checker()
+
+    if not passing:
+      passing = False
+
+      break
+
+  return passing
+
+def init_render (self, context):
+  scene = context.scene
+  armature = scene.armature
+  head_bone_name = scene.head_bone_name
+  avatar = scene.avatar
+  passing = run_checker(self, armature, head_bone_name, avatar)
+
+  if passing:
+    # rename_textures()
+    global texture_dir, material_dir, file_prefix
+    texture_dir = join(tex_dir, f'./{ avatar }')
+    material_dir = join(texture_dir, './Material')
+    a, b, c, d, _, _ = listdir(material_dir)[0].split('_')
+    file_prefix = f'{ a }_{ b }_{ c }_{ d }'
+    mesh_list = init_materials(armature)
+    init_global_shadow(mesh_list, armature, head_bone_name)
+    init_outlines(mesh_list)
+    init_post_processing()
 
 class OBJECT_OT_render (get_operator()):
   bl_idname = 'object.render'
   bl_label = 'Render'
-  dir = os.path.dirname(os.path.abspath(__file__))
-  post_processing_path = os.path.join(dir, '../assets/HoYoverse - Genshin Impact Post-Processing.blend')
-  outlines_path = os.path.join(dir, '../assets/HoYoverse - Genshin Impact Outlines v3.blend')
-  materials_path = os.path.join(dir, '../assets/HoYoverse - Genshin Impact v3.4.blend')
 
   def execute(self, context):
-    scene = context.scene
-    file_config = context.scene.file_config
-    mesh_name = scene.mesh_name
-    armature_name = scene.armature_name
-    head_bone_name = scene.head_bone_name
-    passing = before(self, mesh_name)
-
-    if passing:
-      materials_map = gen_materials_map(file_config)
-      # return {'FINISHED'}
-      textures_dir = transform_path(file_config.textures_dir)
-      materials_dir = transform_path(file_config.materials_dir)
-      post_processing_path = self.post_processing_path
-      outlines_path = self.outlines_path
-      materials_path = self.materials_path
-      body_type = context.scene.body_type
-      images_with_category = init_textures(textures_dir, materials_path, body_type, materials_map)
-      init_global_shadow(materials_path, post_processing_path, mesh_name, armature_name, head_bone_name)
-      init_outlines(images_with_category, textures_dir, materials_dir, outlines_path, mesh_name)
-      # TODO: 眼透 刘海阴影
-      # init_hair_shadow()
-      # init_eye_transparent()
-
+    init_render(self, context)
+  
     return {'FINISHED'}

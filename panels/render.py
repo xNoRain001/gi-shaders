@@ -4,8 +4,11 @@ from ..libs.blender_utils import (
   add_row_with_operator, 
   add_row_with_label, 
   get_operator_file_list_element,
-  get_property_group
+  get_property_group,
+  get_data,
+  get_object_
 )
+from ..operators import OBJECT_OT_render
 
 class VIEW3D_PT_render (get_panel()):
   bl_space_type = 'VIEW_3D'
@@ -14,53 +17,19 @@ class VIEW3D_PT_render (get_panel()):
   bl_label = "GI Render"
   bl_idname = "VIEW3D_PT_render"
 
-  files: get_props().CollectionProperty(type=get_operator_file_list_element())
-
-  def invoke(self, context, event):
-    wm = context.window_manager
-
-    return wm.invoke_props_dialog(self)
-
   def draw(self, context):
     layout = self.layout
     scene = context.scene
-    factor = 0.3
-    file_config = scene.file_config
-
-    # TODO: 光照界面
-    # row = layout.row()
-    # row.prop(scene, 'light_direction_x', text = 'X')
-
-    # row = layout.row()
-    # row.prop(scene, 'light_direction_y', text = 'Y')
-
-    # row = layout.row()
-    # row.prop(scene, 'light_direction_z', text = 'Z')
 
     row = layout.row()
-    row.prop(scene, 'mesh_name', text = 'mesh 名称')
+    row.prop(scene, 'avatar', text = '角色')
     row = layout.row()
-    row.prop(scene, 'armature_name', text = '骨架名称')
-    row = layout.row()
-    row.prop(scene, 'head_bone_name', text = '脸部阴影跟随目标')
- 
-    add_row_with_label(layout, '体型:', scene, 'body_type', factor)
-    add_row_with_label(layout, '光照贴图目录:', file_config, 'textures_dir', factor)
-    add_row_with_label(layout, 'Material 目录（用于描边颜色）:', file_config, 'materials_dir', factor)
- 
-    row = layout.row()
-    row.operator("object.select_face_files")
-    row.operator("object.select_body_files")
-    row.operator("object.select_hair_files")
-    row = layout.row()
-    col = row.column()
-    for file_path in file_config.face_files_path:
-      col.label(text = file_path.name)
-    col = row.column()
-    for file_path in file_config.body_files_path:
-      col.label(text = file_path.name)
-    col = row.column()
-    for file_path in file_config.hair_files_path:
-      col.label(text = file_path.name)
+    row.prop_search(scene, "armature", get_data(), 'objects', text = '骨架名称')
+    
+    armature = scene.armature
+    if armature:
+      row = layout.row()
+      row.prop_search(scene, "head_bone_name", armature.data, 'bones', text = '头')
 
-    add_row_with_operator(layout, 'object.render', '开始渲染')
+    row = layout.row()
+    row.operator(OBJECT_OT_render.bl_idname, text = 'Render')
