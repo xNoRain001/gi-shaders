@@ -15,6 +15,5 @@ def remove_fbx (base):
       if file_extension == '.fbx':
         remove(_base)
 
-        
 dir = join(dirname(abspath(__file__)), '../assets/textures')
 remove_fbx(dir)
