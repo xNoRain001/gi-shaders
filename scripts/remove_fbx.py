@@ -12,7 +12,7 @@ def remove_fbx (base):
     else:
       _, file_extension = splitext(dir)
         
-      if file_extension == '.fbx':
+      if file_extension == '.json':
         remove(_base)
 
 dir = join(dirname(abspath(__file__)), '../assets/textures')

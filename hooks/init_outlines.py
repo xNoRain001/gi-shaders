@@ -26,30 +26,27 @@ def add_nodes_modifier (mesh_list):
       modifier = mesh.modifiers.get(modifier_name)
       modifier.node_group = node_group
 
-      # for node in node_group.nodes:
-      #   if node.type == 'ATTRIBUTE':
-      #       node.attribute_name = "Col"
-
-      modifier[f'Input_3_attribute_name'] = 'Col'
-
+      modifier['Input_3_attribute_name'] = 'Col'
       # 基于几何节点
       modifier["Input_12"] = True
+      # 使用顶点色
+      modifier["Input_13"] = True
       # 描边宽度
       modifier["Input_7"] = 0.25
 
-      # if mesh_name == 'Body':
-      modifier["Input_11"] = get_material("HoYoverse - Genshin Body")
-      modifier["Input_9"] = get_material("HoYoverse - Genshin Outlines - Body")
-      modifier["Input_18"] = get_material("HoYoverse - Genshin Body")
-      modifier["Input_19"] = get_material("HoYoverse - Genshin Outlines - Dress")
-      modifier["Input_10"] = get_material("HoYoverse - Genshin Hair")
-      modifier["Input_5"] = get_material("HoYoverse - Genshin Outlines - Hair")
-      # elif mesh_name == 'EffectHair':
-      modifier["Input_26"] = get_material("HoYoverse - Genshin Effect")
-      modifier["Input_27"] = get_material("HoYoverse - Genshin Outlines - Effect")
-      # elif mesh_name == 'Face' or mesh_name == 'Face_Eye':
-      modifier["Input_14"] = get_material("HoYoverse - Genshin Face")
-      modifier["Input_15"] = get_material("HoYoverse - Genshin Outlines - Face")
+      if mesh_name == 'Body':
+        modifier["Input_11"] = get_material("HoYoverse - Genshin Body")
+        modifier["Input_9"] = get_material("HoYoverse - Genshin Outlines - Body")
+        modifier["Input_18"] = get_material("HoYoverse - Genshin Body")
+        modifier["Input_19"] = get_material("HoYoverse - Genshin Outlines - Dress")
+        modifier["Input_10"] = get_material("HoYoverse - Genshin Hair")
+        modifier["Input_5"] = get_material("HoYoverse - Genshin Outlines - Hair")
+      elif mesh_name == 'EffectHair':
+        modifier["Input_26"] = get_material("HoYoverse - Genshin Effect")
+        modifier["Input_27"] = get_material("HoYoverse - Genshin Outlines - Effect")
+      elif mesh_name == 'Face' or mesh_name == 'Face_Eye':
+        modifier["Input_14"] = get_material("HoYoverse - Genshin Face")
+        modifier["Input_15"] = get_material("HoYoverse - Genshin Outlines - Face")
 
 def get_outline_color (file_path):
   with open(file_path, 'r', encoding = 'utf-8') as file:
@@ -100,11 +97,11 @@ def gen_outline_materials ():
 
 def init_outline_diffuse (type, material):
   node = material.node_tree.nodes['Outline_Diffuse'] 
-  node_set_image(node, f'{ type }_Diffuse.png', 'CHANNEL_PACKED')
+  node_set_image(node, f'{ type }_Diffuse.png', 'diffuse')
 
 def init_outline_lightmap (type, material):
   node = material.node_tree.nodes['Outline_Lightmap'] 
-  node_set_image(node, f'{ type }_Lightmap.png', colorspace_settings = 'Non-Color')
+  node_set_image(node, f'{ type }_Lightmap.png', 'lightmap')
 
 def init_outline_color (type, material):
   file_path = join(material_dir, f'{ file_prefix }_Mat_{ type }.json')
@@ -181,7 +178,6 @@ def init_global_vars (_material_dir, _file_prefix, _outline_path):
 
 def init_outlines (mesh_list, material_dir, file_prefix, outline_path, execute):
   init_global_vars(material_dir, file_prefix, outline_path)
-  # connect_node_group()
   append_node_tree(outline_path)
   gen_outline_materials()
   init_outline_materials()

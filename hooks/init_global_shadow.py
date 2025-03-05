@@ -4,7 +4,11 @@ from ..libs.blender_utils import (
   active_object_,
   get_active_object,
   get_object_,
-  append_node_tree
+  append_node_tree,
+  update_view,
+  get_ops,
+  deselect,
+  active_object_
 )
 
 material_path = None
@@ -45,21 +49,24 @@ def add_nodes_modifier (mesh_list):
     modifier["Input_5"] = objects["Head Forward"]
     modifier["Input_6"] = objects["Head Up"]
 
-def head_origin_add_child_of (armature, head_bone_name):
+def head_origin_add_child_of (armature, head_origin_name):
   head_origin = get_object_('Head Origin')
-  # head origin 内部预先定义了一个
+  # head origin 内部预先定义了一个 Child Of 约束
   constraint = head_origin.constraints.get('Child Of')
   constraint.target = armature
-  constraint.subtarget = head_bone_name
-  # TODO: 设置反向
-  constraint.inverse_matrix = constraint.target.matrix_world.inverted()
+  constraint.subtarget = head_origin_name
+  active_object_(head_origin)
+  get_ops().constraint.childof_set_inverse(
+    constraint = constraint.name, 
+    owner='OBJECT'
+  )
 
 def init_global_vars (_material_path):
   global material_path
   material_path = _material_path
 
-def init_global_shadow (mesh_list, armature, head_bone_name, material_path):
+def init_global_shadow (mesh_list, armature, head_origin_name, material_path):
   init_global_vars(material_path)
   append_objects()
   add_nodes_modifier(mesh_list)
-  head_origin_add_child_of(armature, head_bone_name)
+  head_origin_add_child_of(armature, head_origin_name)

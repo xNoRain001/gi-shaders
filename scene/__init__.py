@@ -1,15 +1,17 @@
-from ..libs.blender_utils import register_classes, unregister_classes
-from .add_armature import add_armature
-from .add_head_bone_name import add_head_bone_name
+from ..libs.blender_utils import add_scene_custom_prop, register_classes, unregister_classes
+from .add_mesh import add_mesh
 from .add_avatar import add_avatar
+from .add_armature import add_armature
+from .add_head_origin_name import add_head_origin_name
 
 # classes = ()
 
 def register():
   # register_classes(classes)
-  add_armature()
-  add_head_bone_name()
+  add_mesh()
   add_avatar()
+  add_armature()
+  add_head_origin_name()
   
 def unregister():
   # unregister_classes(classes)

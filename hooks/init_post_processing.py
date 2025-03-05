@@ -22,4 +22,4 @@ def init_post_processing (post_processing_path):
   append_node_tree(post_processing_path)
   node_tree = init_compositor()
   link_post_processing(node_tree)
-  # bpy.context.scene.view_settings.view_transform = 'Standard'
+  get_context().scene.view_settings.view_transform = 'Standard'

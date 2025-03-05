@@ -1,6 +1,6 @@
 from os import listdir
 from os.path import join, exists
-from ..libs.blender_utils import add_scene_custom_prop
+from ..libs.blender_utils import add_scene_custom_prop, get_context
 from ..const import texture_dir
 
 name_map = {
@@ -137,7 +137,7 @@ name_map = {
 # 菲谢尔 极夜真梦
 # 凝光 纱中幽兰
 
-def add_avatar ():
+def init_items ():
   items = [("None", "None", "")]
   dirs = listdir(texture_dir)
 
@@ -157,9 +157,13 @@ def add_avatar ():
     else:
       items.append((f'{ avatar }', name_map[avatar], ''))
 
+  return items
+
+def add_avatar ():
   add_scene_custom_prop(
     'avatar', 
     'Enum', 
-    items = items,
-    translation_context = ''
+    items = init_items()
   )
+
+  # bpy.app.timers.register(init_avatars, first_interval = 1)

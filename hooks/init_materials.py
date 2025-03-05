@@ -1,12 +1,6 @@
 from os.path import join, exists
 from ..libs.blender_utils import get_data, get_material
 
-# Avatar_Girl_Sword_Furina_Mat_Face
-# Avatar_Girl_Sword_Furina_Mat_Hair
-# Avatar_Girl_Sword_Furina_Mat_Body
-# Avatar_Girl_Sword_Furina_Mat_Dress
-# Avatar_Girl_Sword_Furina_Mat_Effect
-# Avatar_Default_Mat
 file_prefix = None
 texture_dir = None
 prefix = 'HoYoverse - Genshin '
@@ -24,22 +18,25 @@ body_type_map = {
   'Male': 4,
   'Lady': 5
 }
+strategies = {
+  'Furina': {
+    'source': 'Hair',
+    'target': 'Effect'
+  }
+}
 
 def nodes_set_image (
   nodes, 
   image_name, 
-  alpha_mode = None, 
-  colorspace_settings = None
+  type = None
 ):
   for node in nodes:
-    node_set_image(node, image_name, alpha_mode, colorspace_settings)
-
+    node_set_image(node, image_name, type)
 
 def node_set_image (
   node, 
   image_name, 
-  alpha_mode = None, 
-  colorspace_settings = None
+  type
 ):
   if not image_name:
     node.image = None
@@ -59,11 +56,10 @@ def node_set_image (
     
     image = get_data().images.load(image_path)
 
-  if alpha_mode:
-    image.alpha_mode = 'CHANNEL_PACKED'
+  image.alpha_mode = 'CHANNEL_PACKED'
 
-  if colorspace_settings:
-    image.colorspace_settings.name = colorspace_settings
+  if type == 'lightmap' or type == 'normalmap':
+    image.colorspace_settings.name = 'Non-Color'
 
   node.image = image
 
@@ -76,7 +72,7 @@ def import_materials (material_path):
     data_to.materials = data_from.materials
 
 def init_face_diffuse (nodes):
-  node_set_image(nodes['Face_Diffuse'], 'Face_Diffuse.png', 'CHANNEL_PACKED')
+  node_set_image(nodes['Face_Diffuse'], 'Face_Diffuse.png', 'diffuse')
 
 def init_body_type (nodes):
   # 设置脸部阴影的类型
@@ -86,26 +82,23 @@ def init_body_type (nodes):
 def init_shadow_ramp (type):
   node_name = f'{ type }_Shadow_Ramp'
   node = get_data().node_groups.get(f'{ type } Shadow Ramp').nodes.get(node_name)
-  node_set_image(node, f'{ node_name }.png', 'CHANNEL_PACKED')
+  node_set_image(node, f'{ node_name }.png', 'shadow_ramp')
 
 def init_diffuse (material, type):
   node, node2 = get_nodes(material, f'{ type }_Diffuse_UV')
-  image_name = f'{ type }_Diffuse.png'
-  nodes_set_image([node, node2], image_name, 'CHANNEL_PACKED')
+  nodes_set_image([node, node2], f'{ type }_Diffuse.png', 'diffuse')
 
 def init_lightmap (material, type):
   node, node2 = get_nodes(material, f'{ type }_Lightmap_UV')
-  image_name = f'{ type }_Lightmap.png'
-  nodes_set_image([node, node2], image_name, colorspace_settings = 'Non-Color')
+  nodes_set_image([node, node2], f'{ type }_Lightmap.png', 'lightmap')
 
 def init_normalmap (material, type):
   node, node2 = get_nodes(material, f'{ type }_Normalmap_UV')
-  image_name = f'{ type }_Normalmap.png'
-  nodes_set_image([node, node2], image_name, colorspace_settings = 'Non-Color')
+  nodes_set_image([node, node2], f'{ type }_Normalmap.png', 'normalmap')
 
 def reset_uv_map (material):
-  # material.node_tree.nodes["UV Map"].uv_map = ""
-  pass
+  # 不清空有可能会导致未知的问题
+  material.node_tree.nodes["UV Map"].uv_map = ""
 
 def init_face_material ():
   nodes = get_material(f"HoYoverse - Genshin Face").node_tree.nodes
@@ -128,19 +121,19 @@ def init_hair_material ():
   init_normalmap(material, 'Hair')
   reset_uv_map(material)
 
-def gen_and_init_effect_material(execute):
+def gen_and_init_effect_material(avatar, execute):
   def gen_effect_material ():
-    hair_material = get_material('HoYoverse - Genshin Hair')
+    hair_material = get_material(f'HoYoverse - Genshin Hair')
     effect_material = hair_material.copy()
-    effect_material.name = 'HoYoverse - Genshin Effect'
+    effect_material.name = f'HoYoverse - Genshin Effect'
 
     return effect_material
   
   def init_effect_material (material):
     node, node2 = get_nodes(material, 'Hair_Diffuse_UV')
-    nodes_set_image([node, node2], 'EffectHair_Diffuse.png', 'CHANNEL_PACKED')
+    nodes_set_image([node, node2], 'EffectHair_Diffuse.png', 'diffuse')
     node, node2 = get_nodes(material, 'Hair_Lightmap_UV')
-    nodes_set_image([node, node2], 'EffectHair_Lightmap.png', colorspace_settings = 'Non-Color')
+    nodes_set_image([node, node2], 'EffectHair_Lightmap.png', 'lightmap')
     node, node2 = get_nodes(material, 'Hair_Normalmap_UV')
     nodes_set_image([node, node2], None)
 
@@ -182,11 +175,24 @@ def init_global_vars (_file_prefix, _texture_dir):
   file_prefix = _file_prefix
   texture_dir = _texture_dir
 
-def init_materials (armature, material_path, file_prefix, texture_dir, execute):
+def rename_vertex_color (mesh_list):
+  for mesh in mesh_list:
+    # Attribute -> Col
+    mesh.data.vertex_colors[0].name = 'Col'
+
+def init_materials (
+  armature, 
+  material_path, 
+  file_prefix, 
+  texture_dir, 
+  avatar,
+  execute
+):
   init_global_vars(file_prefix, texture_dir)
   import_materials(material_path)
   _init_materials()
-  gen_and_init_effect_material(execute)
+  gen_and_init_effect_material(avatar, execute)
   mesh_list = related_materials(armature)
+  rename_vertex_color(mesh_list)
 
   return mesh_list

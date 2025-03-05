@@ -1,14 +1,8 @@
 from ..libs.blender_utils import (
-  get_props, 
   get_panel, 
-  add_row_with_operator, 
-  add_row_with_label, 
-  get_operator_file_list_element,
-  get_property_group,
   get_data,
-  get_object_
 )
-from ..operators import OBJECT_OT_shaders
+from ..operators import OBJECT_OT_shaders, OBJECT_OT_Search_Avatar
 from ..const import bl_category
 
 class VIEW3D_PT_shaders (get_panel()):
@@ -21,16 +15,16 @@ class VIEW3D_PT_shaders (get_panel()):
   def draw(self, context):
     layout = self.layout
     scene = context.scene
-
-    row = layout.row()
-    row.prop(scene, 'avatar', text = '角色')
-    row = layout.row()
-    row.prop_search(scene, "armature", get_data(), 'objects', text = '骨架名称')
-    
     armature = scene.armature
+    row = layout.row()
+    row.prop(scene, 'avatar', text = 'avatar')
+    # row.operator(OBJECT_OT_Search_Avatar.bl_idname, text = '', icon = 'VIEWZOOM')
+    row = layout.row()
+    row.prop_search(scene, "armature", get_data(), 'objects', text = 'armature')
+    
     if armature:
       row = layout.row()
-      row.prop_search(scene, "head_bone_name", armature.data, 'bones', text = '头')
+      row.prop_search(scene, "head_origin_name", armature.data, 'bones', text = 'head origin')
 
     row = layout.row()
     row.operator(OBJECT_OT_shaders.bl_idname, text = 'Render')
