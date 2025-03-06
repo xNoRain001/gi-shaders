@@ -5,9 +5,7 @@ from ..libs.blender_utils import (
   get_active_object,
   get_object_,
   append_node_tree,
-  update_view,
   get_ops,
-  deselect,
   active_object_
 )
 
@@ -35,19 +33,26 @@ def append_objects ():
   append_node_tree(material_path, 'Light Vectors')
   active_object_(active_object)
 
-def add_nodes_modifier (mesh_list):
-  for mesh in mesh_list:
-    data = get_data()
-    node_groups = data.node_groups
-    objects = data.objects
+def add_nodes_modifier (config):
+  def _add_modifier (mesh, node_groups, objects):
     modifier_name = 'Nodes Modifier For Global Shadow'
-    mesh.modifiers.new(type = 'NODES', name = modifier_name)
-    modifier = mesh.modifiers.get(modifier_name)
+    modifier = mesh.modifiers.new(type = 'NODES', name = modifier_name)
     modifier.node_group = node_groups.get("Light Vectors")
     modifier["Input_3"] = objects["Light Direction"]
     modifier["Input_4"] = objects["Head Origin"]
     modifier["Input_5"] = objects["Head Forward"]
     modifier["Input_6"] = objects["Head Up"]
+
+  def add_modifier (node_groups, objects):
+    mesh_list = config['mesh_list']
+    
+    for mesh in mesh_list:
+      _add_modifier(get_object_(mesh), node_groups, objects)
+
+  data = get_data()
+  node_groups = data.node_groups
+  objects = data.objects
+  add_modifier(node_groups, objects)
 
 def head_origin_add_child_of (armature, head_origin_name):
   head_origin = get_object_('Head Origin')
@@ -65,8 +70,13 @@ def init_global_vars (_material_path):
   global material_path
   material_path = _material_path
 
-def init_global_shadow (mesh_list, armature, head_origin_name, material_path):
+def init_global_shadow (
+  config, 
+  armature, 
+  head_origin_name, 
+  material_path
+):
   init_global_vars(material_path)
   append_objects()
-  add_nodes_modifier(mesh_list)
+  add_nodes_modifier(config)
   head_origin_add_child_of(armature, head_origin_name)

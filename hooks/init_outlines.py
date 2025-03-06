@@ -1,52 +1,57 @@
 import json
-from os.path import join, exists
+from os.path import exists
 from ..libs.blender_utils import (
   get_data,
   get_materials,
   get_material,
-  append_node_tree
+  append_node_tree,
+  get_object_
 )
 
-from .init_materials import node_set_image
+from .init_materials import _node_set_image
+from ..const import material_prefix, outline_material_prefix
 
-material_dir = None
-file_prefix = None
-outline_path = None
+slot_map = {
+  'Hair': ['Input_10', 'Input_5'],
+  'Body': ['Input_11', 'Input_9'],
+  'Face': ['Input_14', 'Input_15'],
+  'Dress': ['Input_18', 'Input_19'],
+  'Dress2': ['Input_24', 'Input_25'],
+  'Other': ['Input_26', 'Input_27']
+}
 
-def add_nodes_modifier (mesh_list):
-  outline_mesh = set(['Body', 'EffectHair', 'Face', 'Face_Eye'])
+def update_nodes_modifier (config):
+  outline_slots = config['outline_slots']
+  modifier_name = 'Nodes Modifier For Outlines'
 
-  for mesh in mesh_list:
-    mesh_name = mesh.name
+  for mesh_name, config in outline_slots.items():
+    mesh = get_object_(mesh_name)
 
-    if mesh_name in outline_mesh:
-      modifier_name = 'Nodes Modifier For Outlines'
-      mesh.modifiers.new(type = 'NODES', name = modifier_name)
-      node_group = get_data().node_groups.get("HoYoverse - Genshin Impact Outlines")
+    for item in config:
+      slot_type, material_suffix, outline_material_suffix = item
       modifier = mesh.modifiers.get(modifier_name)
-      modifier.node_group = node_group
+      slot, slot2 = slot_map[slot_type]
+      modifier[slot] = get_material(material_prefix + material_suffix)
+      modifier[slot2] = get_material(outline_material_prefix + outline_material_suffix)
+    
+def add_nodes_modifier (config):
+  outline_slots = config['outline_slots']
+  node_group = get_data().node_groups.get("HoYoverse - Genshin Impact Outlines")
+  modifier_name = 'Nodes Modifier For Outlines'
 
-      modifier['Input_3_attribute_name'] = 'Col'
-      # 基于几何节点
-      modifier["Input_12"] = True
-      # 使用顶点色
-      modifier["Input_13"] = True
-      # 描边宽度
-      modifier["Input_7"] = 0.25
-
-      if mesh_name == 'Body':
-        modifier["Input_11"] = get_material("HoYoverse - Genshin Body")
-        modifier["Input_9"] = get_material("HoYoverse - Genshin Outlines - Body")
-        modifier["Input_18"] = get_material("HoYoverse - Genshin Body")
-        modifier["Input_19"] = get_material("HoYoverse - Genshin Outlines - Dress")
-        modifier["Input_10"] = get_material("HoYoverse - Genshin Hair")
-        modifier["Input_5"] = get_material("HoYoverse - Genshin Outlines - Hair")
-      elif mesh_name == 'EffectHair':
-        modifier["Input_26"] = get_material("HoYoverse - Genshin Effect")
-        modifier["Input_27"] = get_material("HoYoverse - Genshin Outlines - Effect")
-      elif mesh_name == 'Face' or mesh_name == 'Face_Eye':
-        modifier["Input_14"] = get_material("HoYoverse - Genshin Face")
-        modifier["Input_15"] = get_material("HoYoverse - Genshin Outlines - Face")
+  for mesh_name, config in outline_slots.items():
+    mesh = get_object_(mesh_name)
+    mesh.modifiers.new(type = 'NODES', name = modifier_name)
+    modifier = mesh.modifiers.get(modifier_name)
+    modifier.node_group = node_group
+    # 基于几何节点
+    modifier["Input_12"] = True
+    # 顶点色
+    modifier['Input_3_attribute_name'] = 'Col'
+    # 使用顶点色
+    modifier["Input_13"] = True
+    # 描边宽度
+    modifier["Input_7"] = 0.25
 
 def get_outline_color (file_path):
   with open(file_path, 'r', encoding = 'utf-8') as file:
@@ -83,37 +88,51 @@ def get_outline_color (file_path):
     outline_color5['r'], outline_color5['g'], outline_color5['b'], outline_color5['a'],
   ]
 
-def gen_outline_materials ():
-  list = ['Body', 'Face', 'Hair']
-  material_name = 'HoYoverse - Genshin Outlines'
-  outline_material = get_material(material_name)
+def gen_outline_materials (config):
+  outline_materials = config['outline_materials']
+  outline_material = get_material('HoYoverse - Genshin Outlines')
 
-  for item in list:
+  for key in outline_materials.keys():
+    name = key.split(':')[0]
     new_material = outline_material.copy()
-    new_material.name = f'{ material_name } - { item }'
+    new_material.name = outline_material_prefix + name
 
   # 清理材质
   get_materials().remove(outline_material)
 
-def init_outline_diffuse (type, material):
-  node = material.node_tree.nodes['Outline_Diffuse'] 
-  node_set_image(node, f'{ type }_Diffuse.png', 'diffuse')
+def get_node (body_type, node_name):
+  nodes = get_material(outline_material_prefix + body_type).node_tree.nodes
+  node = nodes[node_name]
 
-def init_outline_lightmap (type, material):
-  node = material.node_tree.nodes['Outline_Lightmap'] 
-  node_set_image(node, f'{ type }_Lightmap.png', 'lightmap')
+  return node
 
-def init_outline_color (type, material):
-  file_path = join(material_dir, f'{ file_prefix }_Mat_{ type }.json')
+def node_set_image (body_type, node_name, image_path, image_type):
+  if not exists(image_path):
+    return
+  
+  data = get_data()
+  node = get_node(body_type, node_name)
+  _node_set_image(data, node, image_path, image_type)
 
-  if exists(file_path):
+def init_outline_materials (config):
+  outline_materials = config['outline_materials']
+  for key, image_path in outline_materials.items():
+    
+    body_type, node_name, iamge_type = key.split(':')
+    node_set_image(body_type, node_name, image_path, iamge_type)
+
+def init_outline_color (config):
+  outline_colors = config['outline_colors']
+
+  for body_type, json_path in outline_colors.items():
+    material = get_material(outline_material_prefix + body_type)
     (
       r, g, b, a,
       r2, g2, b2, a2,
       r3, g3, b3, a3,
       r4, g4, b4, a4,
       r5, g5, b5, a5,
-    ) = get_outline_color(file_path)
+    ) = get_outline_color(json_path)
     outline_node = material.node_tree.nodes["Outlines"]
     outline_node.inputs[15].default_value = (r, g, b, a)
     outline_node.inputs[16].default_value = (r2, g2, b2, a2)
@@ -121,66 +140,11 @@ def init_outline_color (type, material):
     outline_node.inputs[18].default_value = (r4, g4, b4, a4)
     outline_node.inputs[19].default_value = (r5, g5, b5, a5)
 
-def init_body_outline_material ():
-  material = get_material('HoYoverse - Genshin Outlines - Body')
-  init_outline_diffuse('Body', material)
-  init_outline_lightmap('Body', material)
-  init_outline_color('Body', material)
-
-def init_hair_outline_material ():
-  material = get_material('HoYoverse - Genshin Outlines - Hair')
-  init_outline_diffuse('Hair', material)
-  init_outline_lightmap('Hair', material)
-  init_outline_color('Hair', material)
-
-def init_face_outline_material ():
-  material = get_material('HoYoverse - Genshin Outlines - Face')
-  init_outline_diffuse('Face', material)
-  init_outline_color('Hair', material)
-
-def init_outline_materials ():
-  init_body_outline_material()
-  init_hair_outline_material()
-  init_face_outline_material()
-
-def gen_and_init_extra_outline_materials (execute):
-  def gen_extra_outline_materials (execute):
-    # Dress Outline 不关联 Body Outline，因为描边颜色不同
-    body_outline_material = get_material('HoYoverse - Genshin Outlines - Body')
-    dress_outline_material = body_outline_material.copy()
-    dress_outline_material.name = 'HoYoverse - Genshin Outlines - Dress'
-    extral_outline_materials = [dress_outline_material]
-
-    if execute:
-      # Effect Outline 不关联 Hair Outline，因为描边颜色不同
-      hair_outline_material = get_material('HoYoverse - Genshin Outlines - Hair')
-      effect_outline_material = hair_outline_material.copy()
-      effect_outline_material.name = 'HoYoverse - Genshin Outlines - Effect'
-      extral_outline_materials.append(effect_outline_material)
-
-    return extral_outline_materials
-  
-  # 只需要修改颜色
-  def init_extra_outline_materials (extral_outline_materials):
-    for extral_outline_material in extral_outline_materials:
-      # 'HoYoverse - Genshin Outlines - Effect'
-      type = extral_outline_material.name.split('-')[2][1:]
-      init_outline_color(type, extral_outline_material)
-
-  extral_outline_materials = gen_extra_outline_materials(execute)
-  init_extra_outline_materials(extral_outline_materials)
-
-def init_global_vars (_material_dir, _file_prefix, _outline_path):
-  global material_dir, file_prefix, outline_path
-  material_dir = _material_dir
-  file_prefix = _file_prefix
-  outline_path = _outline_path
-
-def init_outlines (mesh_list, material_dir, file_prefix, outline_path, execute):
-  init_global_vars(material_dir, file_prefix, outline_path)
+def init_outlines (config, outline_path):
   append_node_tree(outline_path)
-  gen_outline_materials()
-  init_outline_materials()
-  gen_and_init_extra_outline_materials(execute)
-  add_nodes_modifier(mesh_list)
+  gen_outline_materials(config)
+  init_outline_materials(config)
+  init_outline_color(config)
+  add_nodes_modifier(config)
+  update_nodes_modifier(config)
   

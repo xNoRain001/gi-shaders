@@ -1,9 +1,11 @@
 from os import listdir
-from os.path import join, exists, abspath, dirname
+from os.path import join, abspath, dirname
+from ..libs.blender_utils import get_operator, report_error
 
+from ..patch import add_patch
 from ..const import texture_dir as tex_dir
-from ..libs.blender_utils import get_operator, report_error, get_ops, get_context, get_data
 from ..hooks import (
+  init_config,
   init_outlines, 
   init_materials, 
   init_global_shadow, 
@@ -74,18 +76,13 @@ def init_shaders (self, context):
     material_dir = join(texture_dir, './Materials')
     a, b, c, d, _, _ = listdir(material_dir)[0].split('_')
     file_prefix = f'{ a }_{ b }_{ c }_{ d }'
-    # 按需生成 Effect 材质和描边
-    execute = exists(join(material_dir, f'{ file_prefix }_Mat_Effect.json'))
-    mesh_list = init_materials(
-      armature, 
-      material_path, 
-      file_prefix, 
-      texture_dir,
-      avatar,
-      execute
-    )
-    init_global_shadow(mesh_list, armature, head_origin_name, material_path)
-    init_outlines(mesh_list, material_dir, file_prefix, outline_path, execute)
+    image_path_prefix = f'{ texture_dir }/{ file_prefix }'
+    json_path_prefix = f'{ material_dir }/{ file_prefix }'
+    config = init_config(avatar, image_path_prefix, json_path_prefix, file_prefix)
+    _config = add_patch(config, avatar, image_path_prefix, json_path_prefix)
+    init_materials(armature, material_path, _config)
+    init_global_shadow(_config, armature, head_origin_name, material_path)
+    init_outlines(_config, outline_path)
     init_post_processing(post_processing_path)
 
 class OBJECT_OT_shaders (get_operator()):

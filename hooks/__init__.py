@@ -1,3 +1,4 @@
+from .init_config import init_config
 from .init_outlines import init_outlines
 from .init_materials import init_materials
 from .init_global_shadow import init_global_shadow
