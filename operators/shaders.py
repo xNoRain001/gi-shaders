@@ -1,8 +1,8 @@
 from os import listdir
-from os.path import join, abspath, dirname
+from os.path import join,  exists, abspath, dirname
 from ..libs.blender_utils import get_operator, report_error
 
-from ..patch import add_patch
+from ..patch import add_patch, material_dir_patch
 from ..const import texture_dir as tex_dir
 from ..hooks import (
   init_config,
@@ -71,13 +71,15 @@ def init_shaders (self, context):
   passing = run_checker(self, armature, head_origin_name, avatar)
 
   if passing:
-    # rename_textures()
-    texture_dir = join(tex_dir, f'./{ avatar }')
-    material_dir = join(texture_dir, './Materials')
-    a, b, c, d, _, _ = listdir(material_dir)[0].split('_')
+    texture_dir = join(tex_dir, avatar)
+    print(texture_dir)
+    return
+    material_dir = join(texture_dir, 'Materials')
+    _material_dir = material_dir_patch(texture_dir, material_dir, avatar)
+    a, b, c, d, _, _ = listdir(_material_dir)[0].split('_')
     file_prefix = f'{ a }_{ b }_{ c }_{ d }'
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
-    json_path_prefix = f'{ material_dir }/{ file_prefix }'
+    json_path_prefix = f'{ _material_dir }/{ file_prefix }'
     config = init_config(avatar, image_path_prefix, json_path_prefix, file_prefix)
     _config = add_patch(config, avatar, image_path_prefix, json_path_prefix)
     init_materials(armature, material_path, _config)

@@ -116,26 +116,28 @@ name_map = {
   'YaoYao': '瑶瑶',
   'Yelan': '夜兰',
   'Yun Jin': '云堇',
-  'Zhongli': '钟离'
+  'Zhongli': '钟离',
+  # skin
+  'Diluc - Flamme': '迪卢克 - 殷红终夜',
+  'Barbara - Summer': '芭芭拉 - 闪耀协奏',
+  'Fischl - Highness': '菲谢尔 - 极夜真梦',
+  'Ganyu - Yu': '甘雨 - 玄玉瑶芳',
+  'Jean - Summer': '琴 - 海风之梦',
+  'Kaeya - Alternate': '凯亚 - 帆影游风',
+  'Kamisato Ayaka - Fruhling': '绫华 - 花时来信',
+  'Keqing - Feather': '刻晴 - 霓裾翩跹',
+  'Kirara - Errantry': '绮良良 - 倩影游侠',
+  'Klee - Alternate': '可莉 - 琪花星烛',
+  'Lisa - Studentin': '丽莎 - 叶隐芳名',
+  'Nilou - Fairy': '妮露 - 莎邦之息',
+  'Ningguang - Floral': '凝光 - 纱中幽兰',
+  'Shenhe - Dai': '申鹤 - 冷花幽露',
+  'Xingqiu - Bamboo': '行秋 - 雨化竹身',
+  'Furina - Funingna': '芙宁娜 - 荒' # 我猜测的
 }
 
-# 迪卢克 殷红终夜
-# 胡桃 宿雪桃红
-# 妮露 莎邦之息
-# 申鹤 冷花幽露
-# 甘雨 玄玉瑶芳
-# 可莉 琪花星烛
-# 绫华 花时来信
-# 刻晴 霓裾翩跹
-# 琴 海风之梦
-# 芭芭拉 闪耀协奏
-# 香菱 岁夜欢哗
-# 绮良良 倩影游侠
-# 行秋 雨化竹身
-# 凯亚 帆影游风
-# 丽莎 叶隐芳名
-# 菲谢尔 极夜真梦
-# 凝光 纱中幽兰
+# 胡桃 - 宿雪桃红
+# 香菱 - 岁夜欢哗
 
 def init_items ():
   items = [("None", "None", "")]
@@ -143,17 +145,46 @@ def init_items ():
 
   # 通过材质文件生成角色列表
   for avatar in dirs:
+    if avatar == 'Baizhu':
+      continue
+
     base = join(texture_dir, avatar)
     _dirs = listdir(base)
 
-    # 添加其他皮肤
+    # 可能存在皮肤
     if exists(join(base, 'Default')):
+      if 'Materials' in _dirs:
+        _dirs.remove('Materials')
+      if 'Material' in _dirs:
+        _dirs.remove('Material')
+      if 'Censored' in _dirs:
+        _dirs.remove('Censored') # 已经被和谐的模型
+      # 这里文件夹命名出错了，凯亚和可莉的商城皮肤被命名成了 Alternate，
+      # 只有琴、安柏、罗莎莉亚、莫娜被和谐过
+      # if 'Alternate' in _dirs:
+      #   _dirs.remove('Alternate') # 被和谐后修改的模型
+      
+      if (
+        avatar == 'Jean' or # 琴
+        avatar == 'Amber' or # 安柏
+        avatar == 'Rosaria' or # 罗莎莉亚
+        avatar == 'Mona' # 莫娜
+      ):
+        _dirs.remove('Alternate')
+        
       items.append((f'{ avatar }/Default', name_map[avatar], ''))
+      _dirs.remove('Default')
 
-      for dir in _dirs:
-        if dir != 'Materials' and dir != 'Default':
-          _avatar = f'{ name_map[avatar] } - { dir }'
-          items.append((f'{ _avatar }/{ dir }', _avatar, ''))
+      if len(_dirs):
+        # 此时长度为 1，因为任何角色商城只有一个皮肤
+        for skin_name in _dirs:
+          _avatar = f'{ avatar } - { skin_name }'
+
+          if _avatar in name_map:
+            items.append((f'{ avatar }/{ skin_name }', name_map[_avatar], ''))
+          else:
+            # 未翻译
+            items.append((f'{ avatar }/{ skin_name }', _avatar, ''))
     else:
       items.append((f'{ avatar }', name_map[avatar], ''))
 
@@ -163,7 +194,8 @@ def add_avatar ():
   add_scene_custom_prop(
     'avatar', 
     'Enum', 
-    items = init_items()
+    items = init_items(),
+    translation_context = ''
   )
 
   # bpy.app.timers.register(init_avatars, first_interval = 1)

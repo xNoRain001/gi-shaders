@@ -1,5 +1,6 @@
 from .Furina import Furina
 from .Nahida import Nahida
+from .material_dir_patch import material_dir_patch
 
 strategies = {
   'Furina/Default': Furina,
