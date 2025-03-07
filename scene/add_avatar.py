@@ -174,7 +174,8 @@ def init_items ():
       ):
         _dirs.remove('Alternate')
         
-      items.append((f'{ avatar }/Default', name_map[avatar], ''))
+      # items.append((f'{ avatar }/Default', name_map[avatar], ''))
+      items.append((f'{ avatar }/Default', avatar, ''))
       _dirs.remove('Default')
 
       if len(_dirs):
@@ -183,12 +184,14 @@ def init_items ():
           _avatar = f'{ avatar } - { skin_name }'
 
           if _avatar in name_map:
-            items.append((f'{ avatar }/{ skin_name }', name_map[_avatar], ''))
+            # items.append((f'{ avatar }/{ skin_name }', name_map[_avatar], ''))
+            items.append((f'{ avatar }/{ skin_name }', _avatar, ''))
           else:
             # 未翻译
             items.append((f'{ avatar }/{ skin_name }', _avatar, ''))
     else:
-      items.append((f'{ avatar }', name_map[avatar], ''))
+      # items.append((f'{ avatar }', name_map[avatar], ''))
+      items.append((f'{ avatar }', avatar, ''))
 
   return items
 

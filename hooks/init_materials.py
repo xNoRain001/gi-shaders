@@ -64,9 +64,6 @@ def node_set_image (body_type, node_name, image_path, image_type):
   data = get_data()
   node = get_node(data, body_type, node_name, image_type)
   _node_set_image(data, node, image_path, image_type)
-  
-
-  
 
 def __init_materials (materials):
   for key, image_path in materials.items():

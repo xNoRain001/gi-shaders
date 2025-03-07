@@ -7,7 +7,7 @@ from ..libs.blender_utils import (
 )
 
 from ..operators import OBJECT_OT_shaders, OBJECT_OT_Search_Avatar
-from ..const import bl_category
+from ..const import bl_category, bl_idname
 from ..utisl import get_texture_dir
 
 class VIEW3D_PT_shaders (get_panel()):
