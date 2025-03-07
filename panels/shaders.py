@@ -23,7 +23,7 @@ class VIEW3D_PT_shaders (get_panel()):
 
     if not exists(texture_dir):
       row = layout.row()
-      row.label(text = 'Go to: Edit -> Perferences -> GI Shaders -> Texture Dir')
+      row.label(text = 'Go to: Edit -> Perferences -> GI Shaders -> Set texture dir -> Restart blender')
       return
         
     scene = context.scene

@@ -1,13 +1,18 @@
 bl_info = {
-  "name": "GI Shaders",
-  "blender": (4, 1, 0),
-  "category": "Render",
+  'name': 'GI Shaders',
+  'author': 'xNoRain001',
+  'version': (0, 0, 0),
+  'blender': (4, 1, 0),
+  'location': 'View3D > Sidebar > GI Shaders',
+  'category': 'Render',
+  'description': 'Blender addons for Genshin Impact shaders.',
+  'doc_url': 'https://github.com/xNoRain001/gi-shaders',
+  'tracker_url': 'https://github.com/xNoRain001/gi-shaders/issues'
 }
 
 from .libs.blender_utils import (
   register as utils_register, 
-  unregister as utils_unregister,
-  get_context
+  unregister as utils_unregister
 )
 from .panels import (
   register as panels_register, 
@@ -40,5 +45,5 @@ def unregister():
   operators_unregister()
   scene_unregister()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   register()
