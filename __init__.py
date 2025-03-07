@@ -16,18 +16,24 @@ from .scene import (
   register as scene_register, 
   unregister as scene_unregister
 )
+from .preferences import (
+  register as per_register,
+  unregister as per_unregister,
+)
 
 def register():
   utils_register()
   operators_register()
   panels_register()
   scene_register()
+  per_register()
 
 def unregister():
   utils_unregister()
   panels_unregister()
   operators_unregister()
   scene_unregister()
+  per_unregister()
 
 if __name__ == "__main__":
   register()

@@ -1,10 +1,14 @@
+from os.path import exists
 from ..libs.blender_utils import (
   get_panel, 
   get_data,
-  get_props
+  get_props,
+  get_context
 )
+
 from ..operators import OBJECT_OT_shaders, OBJECT_OT_Search_Avatar
 from ..const import bl_category
+from ..utisl import get_texture_dir
 
 class VIEW3D_PT_shaders (get_panel()):
   bl_space_type = 'VIEW_3D'
@@ -15,10 +19,15 @@ class VIEW3D_PT_shaders (get_panel()):
 
   def draw(self, context):
     layout = self.layout
+    texture_dir = get_texture_dir(context)
+
+    if not exists(texture_dir):
+      row = layout.row()
+      row.label(text = 'Go to: Edit -> Perferences -> GI Shaders -> Texture Dir')
+      return
+        
     scene = context.scene
     armature = scene.armature
-    # row = layout.row()
-    # row.prop(scene, 'texture_dir', text = '')
     row = layout.row()
     row.prop(scene, 'avatar', text = 'Avatar')
     row = layout.row()

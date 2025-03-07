@@ -2,8 +2,8 @@ from os import listdir
 from os.path import join,  exists, abspath, dirname
 from ..libs.blender_utils import get_operator, report_error
 
+from ..utisl import get_texture_dir
 from ..patch import add_patch, material_dir_patch
-from ..const import texture_dir as tex_dir
 from ..hooks import (
   init_config,
   init_outlines, 
@@ -71,9 +71,7 @@ def init_shaders (self, context):
   passing = run_checker(self, armature, head_origin_name, avatar)
 
   if passing:
-    texture_dir = join(tex_dir, avatar)
-    print(texture_dir)
-    return
+    texture_dir = join(get_texture_dir(context), avatar)
     material_dir = join(texture_dir, 'Materials')
     _material_dir = material_dir_patch(texture_dir, material_dir, avatar)
     a, b, c, d, _, _ = listdir(_material_dir)[0].split('_')

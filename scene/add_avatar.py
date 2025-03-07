@@ -1,7 +1,8 @@
 from os import listdir
 from os.path import join, exists
 from ..libs.blender_utils import add_scene_custom_prop, get_context
-from ..const import texture_dir
+
+from ..utisl import get_texture_dir
 
 name_map = {
   'Aether': '空',
@@ -140,6 +141,7 @@ name_map = {
 # 香菱 - 岁夜欢哗
 
 def init_items ():
+  texture_dir = get_texture_dir(get_context())
   items = [("None", "None", "")]
   dirs = listdir(texture_dir)
 
