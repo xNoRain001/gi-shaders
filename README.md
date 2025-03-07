@@ -2,8 +2,10 @@
 Blender addon for Genshin Impact shaders (based on Festivity's [`Blender-miHoYo-Shaders`](https://github.com/festivize/Blender-miHoYo-Shaders)) .
 
 ## Preview
-<img src="./assets/readme/preview.png" alt="preview.png" width="200"/>
-<img src="./assets/readme/preview_02.png" alt="preview_02.png" width="200"/>
+<div align="left">
+  <img src="./assets/readme/preview.png" alt="preview.png" width="200"/>
+  <img src="./assets/readme/preview_02.png" alt="preview_02.png" width="200"/>
+</div>
 
 ## Usage
 1. Download [`GI-Assets`](https://github.com/zeroruka/GI-Assets/tree/main/Models/Characters), My download dir is `D:\gi_assets`
@@ -12,8 +14,10 @@ Blender addon for Genshin Impact shaders (based on Festivity's [`Blender-miHoYo-
 2. Go to the Releases page and download the latest gi-shaders.zip
 3. Open Blender (`Goo Engine v4.1.0`)
 4. Install Addon (Edit > Preferences > Install > Select gi-shaders.zip)
-5. Config preferences, texture dir choose download dir
+5. Config preferences, texture dir choose download assets dir
 <img src="./assets/readme/config-preferences.png" alt="config-preferences.png" />
+
+6. `Restart blend`(After change texture dir, must restart.)
 
 6. Create new blend file and import model, File -> Import -> FBX 
 <img src="./assets/readme/import-fbx.png" alt="import-fbx.png" />
