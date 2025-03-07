@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import join, exists, isdir
 from ..libs.blender_utils import add_scene_custom_prop, get_context
-from ..utisl import get_texture_dir
+from ..utisl import get_texture_dir, get_language
 
 name_map = {
   'Aether': '空',
@@ -141,6 +141,7 @@ name_map = {
 
 def init_items ():
   texture_dir = get_texture_dir(get_context())
+  is_zh = get_language(get_context()) == 'ZH'
   items = [("None", "None", "")]
 
   if not exists(texture_dir):
@@ -181,8 +182,7 @@ def init_items ():
       ):
         _dirs.remove('Alternate')
         
-      # items.append((f'{ avatar }/Default', name_map[avatar], ''))
-      items.append((f'{ avatar }/Default', avatar, ''))
+      items.append((f'{ avatar }/Default', name_map[avatar] if is_zh else avatar, ''))
       _dirs.remove('Default')
 
       if len(_dirs):
@@ -191,14 +191,12 @@ def init_items ():
           _avatar = f'{ avatar } - { skin_name }'
 
           if _avatar in name_map:
-            # items.append((f'{ avatar }/{ skin_name }', name_map[_avatar], ''))
-            items.append((f'{ avatar }/{ skin_name }', _avatar, ''))
+            items.append((f'{ avatar }/{ skin_name }', name_map[_avatar] if is_zh else _avatar, ''))
           else:
             # 未翻译
             items.append((f'{ avatar }/{ skin_name }', _avatar, ''))
     else:
-      # items.append((f'{ avatar }', name_map[avatar], ''))
-      items.append((f'{ avatar }', avatar, ''))
+      items.append((f'{ avatar }', name_map[avatar] if is_zh else avatar, ''))
 
   return items
 
