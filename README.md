@@ -1,3 +1,6 @@
+# GI Shaders
+[English](README.md) | [简体中文](README.zh-cn.md)
+
 ## Introduction
 Blender addon for Genshin Impact shaders (based on Festivity's [`Blender-miHoYo-Shaders`](https://github.com/festivize/Blender-miHoYo-Shaders)) .
 
