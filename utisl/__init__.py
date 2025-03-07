@@ -1,4 +1,9 @@
 from ..const import bl_idname
 
 def get_texture_dir (context):
-  return context.preferences.addons[bl_idname].preferences.texture_dir
+  addons = context.preferences.addons
+
+  if bl_idname in addons:
+    return addons[bl_idname].preferences.texture_dir
+  
+  return ''

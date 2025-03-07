@@ -13,7 +13,7 @@ class Preferences (get_types('AddonPreferences')):
   texture_dir: get_props().StringProperty(
     name = 'Directory',
     subtype = 'DIR_PATH',
-    default = 'D:\gi_assets' # For test
+    # default = 'D:\gi_assets' # For test
   )
 
   def draw(self, context):

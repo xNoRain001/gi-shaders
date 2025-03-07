@@ -1,7 +1,6 @@
 from os import listdir
-from os.path import join, exists
+from os.path import join, exists, isdir
 from ..libs.blender_utils import add_scene_custom_prop, get_context
-
 from ..utisl import get_texture_dir
 
 name_map = {
@@ -143,10 +142,18 @@ name_map = {
 def init_items ():
   texture_dir = get_texture_dir(get_context())
   items = [("None", "None", "")]
+
+  if not exists(texture_dir):
+    return items
+
   dirs = listdir(texture_dir)
 
   # 通过材质文件生成角色列表
   for avatar in dirs:
+    # 选错文件夹了
+    if not isdir(join(texture_dir, avatar)):
+      return
+    
     if avatar == 'Baizhu':
       continue
 
@@ -200,7 +207,7 @@ def add_avatar ():
     'avatar', 
     'Enum', 
     items = init_items(),
-    translation_context = ''
+    # translation_context = ''
   )
 
   # bpy.app.timers.register(init_avatars, first_interval = 1)
