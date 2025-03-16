@@ -23,8 +23,9 @@ def init_node_config ():
   for i in range(28, 38):
     inputs[i].default_value = (1, 1, 1, 1)
 
-def related_materials (armature, config):
-  objects = armature.children
+def related_materials (armature, config, is_weapon):
+  # is_weapon 为 True 时，armature 其实是 mesh
+  objects = [armature] if is_weapon else armature.children
   material_map = config['material_map']  
 
   for object in objects:
@@ -109,4 +110,4 @@ def init_materials (
   reset_uv_map(materials)
   gen_extra_materials(config)
   _init_materials(config, is_weapon)
-  related_materials(armature, config)
+  related_materials(armature, config, is_weapon)

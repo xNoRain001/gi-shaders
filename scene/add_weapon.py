@@ -10,36 +10,36 @@ name_map = {
   # '有乐御簾切',
   # '静水流涌之辉',
   # '裁叶萃光',
-  # '圣显之钥',
-  # '波乱月白经津',
-  # '雾切之回光',
-  # '苍古自由之誓',
-  # '磐岩结绿',
-  # '斫峰之刃',
-  # '风鹰剑',
-  # '天空之刃'
+  'Key of Khai-Nisut': '圣显之钥',
+  'Haran Geppaku Futsu': '波乱月白经津',
+  'Mistsplitter Reforged': '雾切之回光',
+  'Freedom-Sworn': '苍古自由之誓',
+  'Primordial Jade Cutter': '磐岩结绿',
+  'Summit Shaper': '斫峰之刃',
+  'Aquila Fɑvonia': '风鹰剑',
+  'Skyward Blade': '天空之刃',
 
   # 双手剑 Claymore
   # '焚曜千阳',
   # '山王长牙',
   # '裁断',
   # '苇海信标',
-  # '赤角石溃杵',
-  # '松籁响起之时',
-  # '无工之剑',
-  # '天空之傲',
-  # '狼的末路'
+  'Redhorn Stonethresher': '赤角石溃杵',
+  'Song of Broken Pines': '松籁响起之时',
+  'The Unforged': '无工之剑',
+  'Skyward Pride': '天空之傲',
+  'Wolf’s Grɑvestone': '狼的末路',
 
   # 长柄武器 Polearm
   # '柔灯挽歌',
   # '赤月之形',
-  # '赤沙之杖',
-  # '息灾',
-  # '薙草之稻光',
-  # '护摩之杖',
-  # '贯虹之槊',
-  # '和璞鸢',
-  # '天空之脊'
+  'Staff of the Scarlet Sands': '赤沙之杖',
+  'Calamity Queller': '息灾',
+  'Engulfing Lightning': '薙草之稻光',
+  'Staff of Homa': '护摩之杖',
+  'Vortex Vanquisher': '贯虹之槊',
+  'Primordial Jade Winged Spear': '和璞鸢',
+  'Skyward Spine': '天空之脊',
 
   # 法器 Catalyst
   # '寝正月初晴',
@@ -50,24 +50,24 @@ name_map = {
   # '金流监督',
   # '碧落之珑',
   # '图莱杜拉的回忆',
-  # '千夜浮梦',
-  # '神乐之真意'  ,
-  # '不灭月华',
-  # '尘世之锁',
-  # '四风原典',
-  # '天空之卷',
+  'A Thousand Floating': '千夜浮梦',
+  'Kagura’s Verity': '神乐之真意'  ,
+  'Everlasting Moonglow': '不灭月华',
+  'Memory of Dust': '尘世之锁',
+  'Lost Prayer to the Sacred': '四风原典',
+  'Skyward Atlas': '天空之卷',
 
   # 弓 Bow
   # '星鹫赤羽',
   # '白雨心弦',
   # '最初的大魔术',
-  # '猎人之径',
-  'Kirin': '若水', # Aqua Simulacra
-  # '冬极白星',
-  # '飞雷之弦振',
-  # '终末嗟叹之诗	',
-  'Amos': '阿莫斯之弓',
-  # '天空之翼'
+  "Hunter's Path": '猎人之径',
+  'Aqua Simulacra': '若水',
+  'Polar Star': '冬极白星',
+  'Thundering Pulse': '飞雷之弦振',
+  'Elegy for the End': '终末嗟叹之诗',
+  "Amos' Bow": '阿莫斯之弓',
+  'Skyward Harp': '天空之翼'
 }
 
 items = [("None", "None", "")]
@@ -88,6 +88,7 @@ def init_items ():
       old_value = weapon_type
       return items
     
+    items = [("None", "None", "")]
     texture_dir = join(get_weapon_texture_dir(context), weapon_type)
     is_zh = get_language(get_context()) == 'ZH'
     dirs = listdir(texture_dir)

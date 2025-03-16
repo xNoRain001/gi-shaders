@@ -34,10 +34,10 @@ def run_checker (self, context):
 
     return passing
   
-  def check_armature ():
+  def check_weapon_mesh ():
     passing = True
 
-    if armature == None:
+    if weapon_mesh == None:
       passing = False
       report_error(self, '没有选中骨架')
 
@@ -45,10 +45,10 @@ def run_checker (self, context):
 
   scene = context.scene
   weapon = scene.weapon
-  armature = scene.weapon_armature
+  weapon_mesh = scene.weapon_mesh
   weapon_type = scene.weapon_type
   passing = True
-  checkers = [check_weapon_type, check_weapon, check_armature]
+  checkers = [check_weapon_type, check_weapon, check_weapon_mesh]
 
   for checker in checkers:
     passing = checker()
@@ -75,19 +75,18 @@ class OBJECT_OT_weapon_shaders (get_operator()):
   def execute(self, context):
     scene = context.scene
     weapon = scene.weapon
-    armature = scene.armature
     weapon_type = scene.weapon_type
-    armature = scene.weapon_armature
-    weapon_mesh = armature.children[0]
-    texture_dir = join(get_weapon_texture_dir(context), weapon_type, weapon)
-    material_dir = join(texture_dir, 'Materials')
+    weapon_mesh = scene.weapon_mesh
+    base = join(get_weapon_texture_dir(context), weapon_type, weapon)
+    texture_dir = join(base, 'Textures')
+    material_dir = join(base, 'Materials')
     _material_dir = material_dir_patch(texture_dir, material_dir, weapon)
-    a, b, c, _ = listdir(_material_dir)[0].split('_')
-    file_prefix = f'{ a }_{ b }_{ c }_'
+    segments = listdir(_material_dir)[0].split('_')
+    file_prefix = f'{ segments[0] }_{ segments[1] }_{ segments[2] }_'
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
     json_path = f'{ _material_dir }/{ file_prefix }Mat.json'
     config = init_weapon_material_config(image_path_prefix)
-    init_materials(armature, weapon_path, config, True)
+    init_materials(weapon_mesh, weapon_path, config, True)
     weapon_outline_material_config = init_weapon_outline_material_config(image_path_prefix, json_path)
     init_outlines(weapon_outline_material_config, outline_path, weapon, True, weapon_mesh)
     

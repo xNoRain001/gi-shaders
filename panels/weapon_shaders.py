@@ -31,6 +31,6 @@ class VIEW3D_PT_weapon_shaders (get_panel()):
     row = layout.row()
     row.prop(scene, 'weapon', text = 'Weapon')
     row = layout.row()
-    row.prop_search(scene, "weapon_armature", get_data(), 'objects', text = 'Armature')
+    row.prop_search(scene, "weapon_mesh", get_data(), 'objects', text = 'Mesh')
     row = layout.row()
     row.operator(OBJECT_OT_weapon_shaders.bl_idname, text = 'Render')
