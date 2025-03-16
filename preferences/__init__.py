@@ -11,9 +11,14 @@ class Preferences (get_types('AddonPreferences')):
   bl_idname = bl_idname
 
   texture_dir: get_props().StringProperty(
-    name = 'Directory',
+    name = 'texture_dir',
     subtype = 'DIR_PATH',
-    default = 'D:\gi_assets' # For test
+    default = 'D:\\gi_assets\\Characters' # For test
+  )
+  weapon_texture_dir: get_props().StringProperty(
+    name = 'weapon_texture_dir',
+    subtype = 'DIR_PATH',
+    default = 'D:\\gi_assets\\Weapons' # For test
   )
   language: get_props().EnumProperty(
     name = 'language',
@@ -27,6 +32,8 @@ class Preferences (get_types('AddonPreferences')):
     layout = self.layout
     row = layout.row()
     row.prop(self, 'texture_dir', text = 'Texture Dir')
+    row = layout.row()
+    row.prop(self, 'weapon_texture_dir', text = 'Weapon Texture Dir')
     row = layout.row()
     row.prop(self, 'language', text = 'Language')
 

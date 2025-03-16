@@ -1,5 +1,5 @@
 from os import listdir
-from os.path import join,  exists, abspath, dirname
+from os.path import join, abspath, dirname
 from ..libs.blender_utils import get_operator, report_error
 
 from ..utisl import get_texture_dir
@@ -18,7 +18,7 @@ material_path = join(dir, f'{ prefix }v3.4.blend')
 outline_path = join(dir, f'{ prefix }Outlines v3.blend')
 post_processing_path = join(dir, f'{ prefix }Post-Processing.blend')
 
-def run_checker (self, armature, head_origin_name, avatar):
+def run_checker (self, context):
   def check_avatar ():
     passing = True
 
@@ -45,7 +45,11 @@ def run_checker (self, armature, head_origin_name, avatar):
       report_error(self, '脸部阴影跟随骨骼不存在')
 
     return passing
-
+  
+  scene = context.scene
+  avatar = scene.avatar
+  armature = scene.armature
+  head_origin_name = scene.head_origin_name
   passing = True
   checkers = [
     check_avatar, 
@@ -63,14 +67,23 @@ def run_checker (self, armature, head_origin_name, avatar):
 
   return passing
 
-def init_shaders (self, context):
-  scene = context.scene
-  avatar = scene.avatar
-  armature = scene.armature
-  head_origin_name = scene.head_origin_name
-  passing = run_checker(self, armature, head_origin_name, avatar)
+class OBJECT_OT_shaders (get_operator()):
+  bl_idname = 'object.shaders'
+  bl_label = 'Shaders'
 
-  if passing:
+  def invoke(self, context, event):
+    passing = run_checker(self, context)
+  
+    if passing:
+      return self.execute(context)
+    else:
+      return {'CANCELLED'}
+
+  def execute(self, context):
+    scene = context.scene
+    avatar = scene.avatar
+    armature = scene.armature
+    head_origin_name = scene.head_origin_name
     texture_dir = join(get_texture_dir(context), avatar)
     material_dir = join(texture_dir, 'Materials')
     _material_dir = material_dir_patch(texture_dir, material_dir, avatar)
@@ -84,12 +97,5 @@ def init_shaders (self, context):
     init_global_shadow(_config, armature, head_origin_name, material_path)
     init_outlines(_config, outline_path)
     init_post_processing(post_processing_path)
-
-class OBJECT_OT_shaders (get_operator()):
-  bl_idname = 'object.shaders'
-  bl_label = 'Shaders'
-
-  def execute(self, context):
-    init_shaders(self, context)
   
     return {'FINISHED'}

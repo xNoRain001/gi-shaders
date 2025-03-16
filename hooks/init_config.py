@@ -67,7 +67,7 @@ def init_config(avatar, image_path_prefix, json_path_prefix, file_prefix):
       'Dress': dress_material_json
     },
     'outline_slots': {
-      # slot_type slot_material slot_outline_material
+      # mesh_name slot_type material outline_material
       'Face': [['Face', 'Face', 'Face']],
       'Face_Eye': [['Face', 'Face', 'Face']],
       'Body': [

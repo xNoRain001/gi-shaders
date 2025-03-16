@@ -3,6 +3,9 @@ from .add_mesh import add_mesh
 from .add_avatar import add_avatar
 from .add_armature import add_armature
 from .add_head_origin_name import add_head_origin_name
+from .add_weapon import add_weapon
+from .add_weapon_armature import add_weapon_armature
+from .add_weapon_type import add_weapon_type
 
 # classes = ()
 
@@ -12,6 +15,9 @@ def register():
   add_avatar()
   add_armature()
   add_head_origin_name()
+  add_weapon()
+  add_weapon_armature()
+  add_weapon_type()
   
 def unregister():
   # unregister_classes(classes)

@@ -20,12 +20,12 @@ slot_map = {
   'Other': ['Input_26', 'Input_27']
 }
 
-def update_nodes_modifier (config):
+def update_nodes_modifier (config, is_weapon, weapon_mesh):
   outline_slots = config['outline_slots']
   modifier_name = 'Nodes Modifier For Outlines'
 
   for mesh_name, config in outline_slots.items():
-    mesh = get_object_(mesh_name)
+    mesh = weapon_mesh if is_weapon else get_object_(mesh_name) 
 
     for item in config:
       slot_type, material_suffix, outline_material_suffix = item
@@ -34,22 +34,25 @@ def update_nodes_modifier (config):
       modifier[slot] = get_material(material_prefix + material_suffix)
       modifier[slot2] = get_material(outline_material_prefix + outline_material_suffix)
     
-def add_nodes_modifier (config):
+def add_nodes_modifier (config, is_weapon, weapon_mesh):
   outline_slots = config['outline_slots']
   node_group = get_data().node_groups.get("HoYoverse - Genshin Impact Outlines")
   modifier_name = 'Nodes Modifier For Outlines'
 
   for mesh_name, config in outline_slots.items():
-    mesh = get_object_(mesh_name)
+    mesh = weapon_mesh if is_weapon else get_object_(mesh_name) 
     mesh.modifiers.new(type = 'NODES', name = modifier_name)
     modifier = mesh.modifiers.get(modifier_name)
     modifier.node_group = node_group
     # 基于几何节点
     modifier["Input_12"] = True
-    # 顶点色
-    modifier['Input_3_attribute_name'] = 'Col'
-    # 使用顶点色
-    modifier["Input_13"] = True
+
+    if not is_weapon:
+      # 顶点色
+      modifier['Input_3_attribute_name'] = 'Col'
+      # 使用顶点色
+      modifier["Input_13"] = True
+
     # 描边宽度
     modifier["Input_7"] = 0.25
 
@@ -121,7 +124,7 @@ def init_outline_materials (config):
     body_type, node_name, iamge_type = key.split(':')
     node_set_image(body_type, node_name, image_path, iamge_type)
 
-def init_outline_color (config):
+def init_outline_color (config, is_weapon):
   outline_colors = config['outline_colors']
 
   for body_type, json_path in outline_colors.items():
@@ -133,18 +136,26 @@ def init_outline_color (config):
       r4, g4, b4, a4,
       r5, g5, b5, a5,
     ) = get_outline_color(json_path)
-    outline_node = material.node_tree.nodes["Outlines"]
-    outline_node.inputs[15].default_value = (r, g, b, a)
-    outline_node.inputs[16].default_value = (r2, g2, b2, a2)
-    outline_node.inputs[17].default_value = (r3, g3, b3, a3)
-    outline_node.inputs[18].default_value = (r4, g4, b4, a4)
-    outline_node.inputs[19].default_value = (r5, g5, b5, a5)
+    inputs = material.node_tree.nodes["Outlines"].inputs
 
-def init_outlines (config, outline_path):
+    if is_weapon:
+      inputs[17].default_value = (r, g, b, a)
+      inputs[18].default_value = (r2, g2, b2, a2)
+      inputs[19].default_value = (r3, g3, b3, a3)
+      inputs[20].default_value = (r4, g4, b4, a4)
+      inputs[21].default_value = (r5, g5, b5, a5)
+    else:
+      inputs[15].default_value = (r, g, b, a)
+      inputs[16].default_value = (r2, g2, b2, a2)
+      inputs[17].default_value = (r3, g3, b3, a3)
+      inputs[18].default_value = (r4, g4, b4, a4)
+      inputs[19].default_value = (r5, g5, b5, a5)
+
+def init_outlines (config, outline_path, is_weapon = False, weapon_mesh = None):
   append_node_tree(outline_path)
   gen_outline_materials(config)
   init_outline_materials(config)
-  init_outline_color(config)
-  add_nodes_modifier(config)
-  update_nodes_modifier(config)
+  init_outline_color(config, is_weapon)
+  add_nodes_modifier(config, is_weapon, weapon_mesh)
+  update_nodes_modifier(config, is_weapon, weapon_mesh)
   
