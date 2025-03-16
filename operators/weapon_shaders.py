@@ -3,8 +3,12 @@ from os.path import join,  exists, abspath, dirname
 from ..libs.blender_utils import get_operator, report_error
 
 from ..utisl import get_weapon_texture_dir
-from ..patch import add_patch, material_dir_patch
-from ..hooks import init_weapon_config, init_weapon_materials, init_outlines
+from ..outline_patch import material_dir_patch
+from ..config import (
+  init_weapon_material_config, 
+  init_weapon_outline_material_config, 
+)
+from ..hooks import init_materials, init_outlines
 
 dir = dirname(abspath(__file__))
 prefix = '../assets/shaders/HoYoverse - Genshin Impact '
@@ -82,8 +86,9 @@ class OBJECT_OT_weapon_shaders (get_operator()):
     file_prefix = f'{ a }_{ b }_{ c }_'
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
     json_path = f'{ _material_dir }/{ file_prefix }Mat.json'
-    config = init_weapon_config(image_path_prefix, json_path, weapon)
-    init_weapon_materials(weapon_path, config, weapon, weapon_mesh)
-    # init_outlines(config, outline_path, True, weapon_mesh)
+    config = init_weapon_material_config(image_path_prefix)
+    init_materials(armature, weapon_path, config, True)
+    weapon_outline_material_config = init_weapon_outline_material_config(image_path_prefix, json_path)
+    init_outlines(weapon_outline_material_config, outline_path, weapon, True, weapon_mesh)
     
     return {'FINISHED'}

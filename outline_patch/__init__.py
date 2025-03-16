@@ -7,8 +7,8 @@ strategies = {
   'Nahida': Nahida
 }
 
-def add_patch (config, avatar, image_path_prefix, json_path_prefix):
+def add_outline_patch (config, avatar, json_path_prefix):
   if avatar in strategies:
-    strategies[avatar](config, image_path_prefix, json_path_prefix)
+    strategies[avatar](config, json_path_prefix)
 
   return config

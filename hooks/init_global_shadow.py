@@ -66,6 +66,13 @@ def head_origin_add_child_of (armature, head_origin_name):
     owner='OBJECT'
   )
 
+def rename_vertex_color (config):
+  mesh_list = config['mesh_list']
+  
+  for mesh_name in mesh_list:
+    # Attribute -> Col
+    get_object_(mesh_name).data.vertex_colors[0].name = 'Col'
+
 def init_global_vars (_material_path):
   global material_path
   material_path = _material_path
@@ -80,3 +87,4 @@ def init_global_shadow (
   append_objects()
   add_nodes_modifier(config)
   head_origin_add_child_of(armature, head_origin_name)
+  rename_vertex_color(config)

@@ -1,5 +1,5 @@
 from os.path import exists
-from ..libs.blender_utils import get_data, get_material, get_object_
+from ..libs.blender_utils import get_data, get_material
 
 from ..const import material_prefix
 
@@ -12,16 +12,16 @@ def reset_uv_map (materials):
     if node_name in nodes:
       nodes[node_name].uv_map = ""
 
-def import_materials (material_path):
-  # Body Face Hair Outlines
-  with get_data().libraries.load(material_path, link = False) as (data_from, data_to):
-    data_to.materials = data_from.materials
-
-  reset_uv_map(data_to.materials)
-
 def init_body_type (config):
-  node = get_data().materials[f'{ material_prefix }Face'].node_tree.nodes['Face Shader']
+  node = get_data().materials[material_prefix + 'Face'].node_tree.nodes['Face Shader']
   node.inputs[0].default_value = config['body_type']
+
+def init_node_config ():
+  inputs = get_material('HoYoverse - Genshin Weapons').node_tree.nodes["Body Shader"].inputs
+  inputs[0].default_value = 1
+
+  for i in range(28, 38):
+    inputs[i].default_value = (1, 1, 1, 1)
 
 def related_materials (armature, config):
   objects = armature.children
@@ -70,17 +70,14 @@ def __init_materials (materials):
     body_type, node_name, image_type = key.split(':')
     node_set_image(body_type, node_name, image_path, image_type)
 
-def _init_materials (config):
+def _init_materials (config, is_weapon):
   materials = config['materials']
   __init_materials(materials)
-  init_body_type(config)
 
-def rename_vertex_color (config):
-  mesh_list = config['mesh_list']
-  
-  for mesh_name in mesh_list:
-    # Attribute -> Col
-    get_object_(mesh_name).data.vertex_colors[0].name = 'Col'
+  if is_weapon:
+    init_node_config()
+  else:
+    init_body_type(config)
 
 def gen_extra_materials (config):
   extra_materials = config['extra_materials']
@@ -91,13 +88,25 @@ def gen_extra_materials (config):
     new_material = material.copy()
     new_material.name = material_prefix + target
 
+def import_materials (material_path, is_weapon):
+  with get_data().libraries.load(material_path, link = False) as (data_from, data_to):
+    if is_weapon:
+      for material in data_from.materials:
+        if material == 'HoYoverse - Genshin Weapons' or material == 'HoYoverse - Genshin Outlines':
+          data_to.materials.append(material)
+    else:
+      data_to.materials = data_from.materials
+
+  return data_to.materials
+
 def init_materials (
   armature, 
   material_path, 
-  config
+  config,
+  is_weapon = False
 ):
-  import_materials(material_path)
+  materials = import_materials(material_path, is_weapon)
+  reset_uv_map(materials)
   gen_extra_materials(config)
-  _init_materials(config)
+  _init_materials(config, is_weapon)
   related_materials(armature, config)
-  rename_vertex_color(config)

@@ -97,8 +97,11 @@ def gen_outline_materials (config):
 
   for key in outline_materials.keys():
     name = key.split(':')[0]
-    new_material = outline_material.copy()
-    new_material.name = outline_material_prefix + name
+    material_name = outline_material_prefix + name
+
+    if not get_material(material_name):
+      new_material = outline_material.copy()
+      new_material.name = material_name
 
   # 清理材质
   get_materials().remove(outline_material)
@@ -151,11 +154,25 @@ def init_outline_color (config, is_weapon):
       inputs[18].default_value = (r4, g4, b4, a4)
       inputs[19].default_value = (r5, g5, b5, a5)
 
-def init_outlines (config, outline_path, is_weapon = False, weapon_mesh = None):
+def rename_materials (avatar_or_weapon):
+  materials = get_materials()
+
+  for material in materials:
+    if material.name.startswith('HoYoverse - Genshin'):
+      material.name = f'{ avatar_or_weapon } - { material.name }'
+
+def init_outlines (
+  config, 
+  outline_path, 
+  avatar_or_weapon,
+  is_weapon = False, 
+  weapon_mesh = None
+):
   append_node_tree(outline_path)
   gen_outline_materials(config)
   init_outline_materials(config)
   init_outline_color(config, is_weapon)
   add_nodes_modifier(config, is_weapon, weapon_mesh)
   update_nodes_modifier(config, is_weapon, weapon_mesh)
+  rename_materials(avatar_or_weapon)
   

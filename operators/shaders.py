@@ -3,14 +3,20 @@ from os.path import join, abspath, dirname
 from ..libs.blender_utils import get_operator, report_error
 
 from ..utisl import get_texture_dir
-from ..patch import add_patch, material_dir_patch
+from ..config import (
+  init_material_config,
+  init_global_shadow_config,
+  init_outline_material_config
+)
 from ..hooks import (
-  init_config,
   init_outlines, 
   init_materials, 
   init_global_shadow, 
-  init_post_processing
+  init_post_processing,
 )
+from ..material_patch import add_material_patch
+from ..global_shadow_patch import add_global_shadow_patch
+from ..outline_patch import add_outline_patch, material_dir_patch
 
 dir = dirname(abspath(__file__))
 prefix = '../assets/shaders/HoYoverse - Genshin Impact '
@@ -89,13 +95,19 @@ class OBJECT_OT_shaders (get_operator()):
     _material_dir = material_dir_patch(texture_dir, material_dir, avatar)
     a, b, c, d, _, _ = listdir(_material_dir)[0].split('_')
     file_prefix = f'{ a }_{ b }_{ c }_{ d }'
+    body_type = b
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
     json_path_prefix = f'{ _material_dir }/{ file_prefix }'
-    config = init_config(avatar, image_path_prefix, json_path_prefix, file_prefix)
-    _config = add_patch(config, avatar, image_path_prefix, json_path_prefix)
-    init_materials(armature, material_path, _config)
-    init_global_shadow(_config, armature, head_origin_name, material_path)
-    init_outlines(_config, outline_path)
+
+    material_config = init_material_config(body_type, image_path_prefix)
+    _material_config = add_material_patch(material_config, avatar, image_path_prefix)
+    init_materials(armature, material_path, _material_config)
+    global_shadow_config = init_global_shadow_config()
+    _global_shadow_config = add_global_shadow_patch(global_shadow_config, avatar)
+    init_global_shadow(_global_shadow_config, armature, head_origin_name, material_path)
+    outline_material_config = init_outline_material_config(avatar, json_path_prefix)
+    _outline_material_config = add_outline_patch(outline_material_config, avatar, json_path_prefix)
+    init_outlines(_outline_material_config, outline_path, avatar)
     init_post_processing(post_processing_path)
-  
+
     return {'FINISHED'}
