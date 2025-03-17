@@ -16,7 +16,7 @@ Blender 原神三渲二插件（基于 Festivity 的 [`Blender-miHoYo-Shaders`](
 
 ### 渲染角色
 
-1. 下载 [`GI-Assets`](https://github.com/zeroruka/GI-Assets/tree/main/Models/Characters), 我的下载路径是 `D:\gi_assets\Characters`（按需下载）
+1. 下载 [`GI-Assets`](https://github.com/xNoRain001/gi-assets/tree/master/Characters), 我的下载路径是 `D:\gi_assets\Characters`（按需下载）
 <img src="./assets/readme/download-dir.png" alt="download-dir.png" />
 
 2. [Releases](https://github.com/xNoRain001/gi-shaders/releases) 页面下载最新的 gi-shaders.zip
@@ -40,7 +40,7 @@ Blender 原神三渲二插件（基于 Festivity 的 [`Blender-miHoYo-Shaders`](
 
 ### 渲染武器
 
-1. 下载 [`GI-Assets`](https://github.com/Hoyotoon/HoyoToon-Assets/tree/main/Genshin%20Impact/Weapons), 我的下载路径是 `D:\gi_assets\Weapons`（按需下载）
+1. 下载 [`GI-Assets`](https://github.com/xNoRain001/gi-assets/tree/master/Weapons), 我的下载路径是 `D:\gi_assets\Weapons`（按需下载）
 <img src="./assets/readme/download-dir-2.png" alt="download-dir-2.png" />
 
 2. 渲染 

@@ -15,7 +15,9 @@ Blender addon for Genshin Impact shaders (based on Festivity's [`Blender-miHoYo-
 
 ### Render avatar
 
-1. Download [`GI-Assets`](https://github.com/zeroruka/GI-Assets/tree/main/Models/Characters), My download dir is `D:\gi_assets\Characters`(Download as needed)
+
+
+1. Download [`GI-Assets`](https://github.com/xNoRain001/gi-assets/tree/master/Characters), My download dir is `D:\gi_assets\Characters`(Download as needed)
 <img src="./assets/readme/download-dir.png" alt="download-dir.png" />
 
 2. Go to the [Releases](https://github.com/xNoRain001/gi-shaders/releases) page and download the latest gi-shaders.zip
@@ -39,7 +41,7 @@ Blender addon for Genshin Impact shaders (based on Festivity's [`Blender-miHoYo-
 
 ### Render weapon
 
-1. Download [`GI-Assets`](https://github.com/Hoyotoon/HoyoToon-Assets/tree/main/Genshin%20Impact/Weapons), My download dir is `D:\gi_assets\Weapons`(Download as needed)
+1. Download [`GI-Assets`](https://github.com/xNoRain001/gi-assets/tree/master/Weapons), My download dir is `D:\gi_assets\Weapons`(Download as needed)
 <img src="./assets/readme/download-dir-2.png" alt="download-dir-2.png" />
 
 2. Render
