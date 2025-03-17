@@ -5,11 +5,11 @@ from ..libs.blender_utils import add_scene_custom_prop, get_context
 from ..utisl import get_language, get_weapon_texture_dir
 
 weapon_type_map = {
-  'Sword': '单手剑',
-  'Claymore': '双手剑',
-  'Polearm': '长柄武器',
-  'Catalyst': '法器',
-  'Bow': '弓'
+  'Swords': '单手剑',
+  'Claymores': '双手剑',
+  'Polearms': '长柄武器',
+  'Catalysts': '法器',
+  'Bows': '弓'
 }
 
 def init_items ():

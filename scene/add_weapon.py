@@ -10,13 +10,13 @@ name_map = {
   # '有乐御簾切',
   # '静水流涌之辉',
   # '裁叶萃光',
-  'Key of Khai-Nisut': '圣显之钥',
+  'Key of Khaj-Nisut': '圣显之钥',
   'Haran Geppaku Futsu': '波乱月白经津',
   'Mistsplitter Reforged': '雾切之回光',
   'Freedom-Sworn': '苍古自由之誓',
   'Primordial Jade Cutter': '磐岩结绿',
   'Summit Shaper': '斫峰之刃',
-  'Aquila Fɑvonia': '风鹰剑',
+  'Aquila Favonia': '风鹰剑',
   'Skyward Blade': '天空之刃',
 
   # 双手剑 Claymore
@@ -28,7 +28,7 @@ name_map = {
   'Song of Broken Pines': '松籁响起之时',
   'The Unforged': '无工之剑',
   'Skyward Pride': '天空之傲',
-  'Wolf’s Grɑvestone': '狼的末路',
+  "Wolf's Gravestone": '狼的末路',
 
   # 长柄武器 Polearm
   # '柔灯挽歌',
@@ -38,7 +38,7 @@ name_map = {
   'Engulfing Lightning': '薙草之稻光',
   'Staff of Homa': '护摩之杖',
   'Vortex Vanquisher': '贯虹之槊',
-  'Primordial Jade Winged Spear': '和璞鸢',
+  'Primordial Jade Winged-Spear': '和璞鸢',
   'Skyward Spine': '天空之脊',
 
   # 法器 Catalyst
@@ -50,11 +50,11 @@ name_map = {
   # '金流监督',
   # '碧落之珑',
   # '图莱杜拉的回忆',
-  'A Thousand Floating': '千夜浮梦',
-  'Kagura’s Verity': '神乐之真意'  ,
+  'A Thousand Floating Dreams': '千夜浮梦',
+  "Kagura's Verity": '神乐之真意'  ,
   'Everlasting Moonglow': '不灭月华',
   'Memory of Dust': '尘世之锁',
-  'Lost Prayer to the Sacred': '四风原典',
+  'Lost Prayer to the Sacred Winds': '四风原典',
   'Skyward Atlas': '天空之卷',
 
   # 弓 Bow
