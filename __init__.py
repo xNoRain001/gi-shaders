@@ -1,7 +1,7 @@
 bl_info = {
   'name': 'GI Shaders',
   'author': 'xNoRain001',
-  'version': (0, 0, 2),
+  'version': (0, 0, 3),
   'blender': (4, 1, 0),
   'location': 'View3D > Sidebar > GI Shaders',
   'category': 'Render',
