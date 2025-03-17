@@ -13,12 +13,12 @@ class Preferences (get_types('AddonPreferences')):
   texture_dir: get_props().StringProperty(
     name = 'texture_dir',
     subtype = 'DIR_PATH',
-    # default = 'D:\\gi_assets\\Characters' # For test
+    default = 'D:\\gi-assets2\\Characters' # For test
   )
   weapon_texture_dir: get_props().StringProperty(
     name = 'weapon_texture_dir',
     subtype = 'DIR_PATH',
-    # default = 'D:\\gi_assets\\Weapons' # For test
+    default = 'D:\\gi-assets2\\Weapons' # For test
   )
   language: get_props().EnumProperty(
     name = 'language',

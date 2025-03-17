@@ -4,7 +4,7 @@ from .shaders import VIEW3D_PT_shaders
 from .weapon_shaders import VIEW3D_PT_weapon_shaders
 
 classes = (
-  # VIEW3D_PT_reload_gi_shaders_addon,
+  VIEW3D_PT_reload_gi_shaders_addon,
   VIEW3D_PT_shaders,
   VIEW3D_PT_weapon_shaders
 )

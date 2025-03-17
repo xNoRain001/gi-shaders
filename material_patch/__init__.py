@@ -3,7 +3,7 @@ from .Nahida import Nahida
 
 strategies = {
   'Furina/Default': Furina,
-  'Nahida': Nahida
+  'Nahida/Default': Nahida
 }
 
 def add_material_patch (config, avatar, image_path_prefix):

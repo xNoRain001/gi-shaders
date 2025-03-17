@@ -16,7 +16,7 @@ from ..hooks import (
 )
 from ..material_patch import add_material_patch
 from ..global_shadow_patch import add_global_shadow_patch
-from ..outline_patch import add_outline_patch, material_dir_patch
+from ..outline_patch import add_outline_patch
 
 dir = dirname(abspath(__file__))
 prefix = '../assets/shaders/HoYoverse - Genshin Impact '
@@ -90,15 +90,14 @@ class OBJECT_OT_shaders (get_operator()):
     avatar = scene.avatar
     armature = scene.armature
     head_origin_name = scene.head_origin_name
-    texture_dir = join(get_texture_dir(context), avatar)
-    material_dir = join(texture_dir, 'Materials')
-    _material_dir = material_dir_patch(texture_dir, material_dir, avatar)
-    a, b, c, d, _, _ = listdir(_material_dir)[0].split('_')
+    base = join(get_texture_dir(context), avatar)
+    texture_dir = join(base, 'Textures')
+    material_dir = join(base, 'Materials')
+    a, b, c, d, _, _ = listdir(material_dir)[0].split('_')
     file_prefix = f'{ a }_{ b }_{ c }_{ d }'
     body_type = b
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
-    json_path_prefix = f'{ _material_dir }/{ file_prefix }'
-
+    json_path_prefix = f'{ material_dir }/{ file_prefix }'
     material_config = init_material_config(body_type, image_path_prefix)
     _material_config = add_material_patch(material_config, avatar, image_path_prefix)
     init_materials(armature, material_path, _material_config)

@@ -1,10 +1,9 @@
 from .Furina import Furina
 from .Nahida import Nahida
-from .material_dir_patch import material_dir_patch
 
 strategies = {
   'Furina/Default': Furina,
-  'Nahida': Nahida
+  'Nahida/Default': Nahida,
 }
 
 def add_outline_patch (config, avatar, json_path_prefix):

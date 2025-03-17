@@ -3,7 +3,6 @@ from os.path import join,  exists, abspath, dirname
 from ..libs.blender_utils import get_operator, report_error
 
 from ..utisl import get_weapon_texture_dir
-from ..outline_patch import material_dir_patch
 from ..config import (
   init_weapon_material_config, 
   init_weapon_outline_material_config, 
@@ -80,11 +79,10 @@ class OBJECT_OT_weapon_shaders (get_operator()):
     base = join(get_weapon_texture_dir(context), weapon_type, weapon)
     texture_dir = join(base, 'Textures')
     material_dir = join(base, 'Materials')
-    _material_dir = material_dir_patch(texture_dir, material_dir, weapon)
-    segments = listdir(_material_dir)[0].split('_')
+    segments = listdir(material_dir)[0].split('_')
     file_prefix = f'{ segments[0] }_{ segments[1] }_{ segments[2] }_'
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
-    json_path = f'{ _material_dir }/{ file_prefix }Mat.json'
+    json_path = f'{ material_dir }/{ file_prefix }Mat.json'
     config = init_weapon_material_config(image_path_prefix)
     init_materials(weapon_mesh, weapon_path, config, True)
     weapon_outline_material_config = init_weapon_outline_material_config(image_path_prefix, json_path)
