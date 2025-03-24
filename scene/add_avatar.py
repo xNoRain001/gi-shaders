@@ -70,7 +70,7 @@ name_map = {
   # 'La Signora': '女士',
   'La Signora': '女士',
   'Layla': '莱依拉',
-  'Linette': '琳妮特',
+  'Lynette': '琳妮特',
   'Lisa': '丽莎',
   'Lumine': '荧',
   'Lyney': '林尼',
