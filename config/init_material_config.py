@@ -27,8 +27,7 @@ def init_material_config (body_type, image_path_prefix):
   common['hair_diffuse'] = hair_diffuse = gen_image_path(image_path_prefix, 'Hair', 'Diffuse')
   common['hair_lightmap'] = hair_lightmap = gen_image_path(image_path_prefix, 'Hair', 'Lightmap')
   hair_normalmap = gen_image_path(image_path_prefix, 'Hair', 'Normalmap')
-
-  return {
+  config = {
     'body_type': body_type_map[body_type],
     'materials': {
       'Face:Face_Diffuse:diffuse': face_diffuse,
@@ -49,9 +48,12 @@ def init_material_config (body_type, image_path_prefix):
     },
     'extra_materials': [],
     'material_map': {
+      # 默认材质的后缀 新材质的名称
       'Face': f'{ material_prefix }Face',
       'Hair': f'{ material_prefix }Hair',
       'Body': f'{ material_prefix }Body',
       'Dress': f'{ material_prefix }Body'
     }
   }
+
+  return config

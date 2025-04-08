@@ -38,11 +38,11 @@ def related_materials (armature, config, is_weapon):
         if suffix in material_map:
           materials[index] = get_material(material_map[suffix])
 
-def get_node (data, body_type, node_name, image_type):
+def get_node (avatar_or_weapon, data, body_type, node_name, image_type):
   if image_type == 'shadow_ramp':
     # 去节点组内寻找
     # Body_Shadow_Ramp -> Body Shadow Ramp
-    node = data.node_groups[node_name.replace('_', ' ')].nodes[node_name]
+    node = data.node_groups[node_name.replace('_', ' ') + ' ' + avatar_or_weapon].nodes[node_name]
   else:
     node = get_material(material_prefix + body_type).node_tree.nodes[node_name]
 
@@ -57,23 +57,23 @@ def _node_set_image (data, node, image_path, image_type):
 
   node.image = image
 
-def node_set_image (body_type, node_name, image_path, image_type):
+def node_set_image (avatar_or_weapon, body_type, node_name, image_path, image_type):
   # 3.0 之前不存在法向贴图
   if not exists(image_path):
     return
   
   data = get_data()
-  node = get_node(data, body_type, node_name, image_type)
+  node = get_node(avatar_or_weapon, data, body_type, node_name, image_type)
   _node_set_image(data, node, image_path, image_type)
 
-def __init_materials (materials):
+def __init_materials (avatar_or_weapon, materials):
   for key, image_path in materials.items():
     body_type, node_name, image_type = key.split(':')
-    node_set_image(body_type, node_name, image_path, image_type)
+    node_set_image(avatar_or_weapon, body_type, node_name, image_path, image_type)
 
-def _init_materials (config, is_weapon):
+def _init_materials (avatar_or_weapon, config, is_weapon):
   materials = config['materials']
-  __init_materials(materials)
+  __init_materials(avatar_or_weapon, materials)
 
   if is_weapon:
     init_node_config()
@@ -100,14 +100,35 @@ def import_materials (material_path, is_weapon):
 
   return data_to.materials
 
+def rename_group (avatar_or_weapon, is_weapon):
+  if is_weapon:
+    return
+  
+  materials = [
+    get_material('HoYoverse - Genshin Body'),
+    get_material('HoYoverse - Genshin Hair'),
+  ]
+  suffixes = ['Body', 'Hair']
+  
+  for material in materials:
+    for node in material.node_tree.nodes:
+      if node.type == 'GROUP':
+        node_tree = node.node_tree
+
+        for suffix in suffixes:
+          if node_tree.name.startswith(f'{ suffix } Shadow Ramp'):
+            node_tree.name = f'{ suffix } Shadow Ramp { avatar_or_weapon }'
+
 def init_materials (
+  avatar_or_weapon,
   armature, 
   material_path, 
   config,
   is_weapon = False
 ):
   materials = import_materials(material_path, is_weapon)
+  rename_group(avatar_or_weapon, is_weapon)
   reset_uv_map(materials)
   gen_extra_materials(config)
-  _init_materials(config, is_weapon)
+  _init_materials(avatar_or_weapon, config, is_weapon)
   related_materials(armature, config, is_weapon)

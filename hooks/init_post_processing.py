@@ -19,6 +19,9 @@ def init_compositor ():
   return _node_tree
 
 def init_post_processing (post_processing_path):
+  if get_data().node_groups.get('HoYoverse - Post Processing'):
+    return
+  
   append_node_tree(post_processing_path)
   node_tree = init_compositor()
   link_post_processing(node_tree)

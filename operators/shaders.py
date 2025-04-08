@@ -93,18 +93,18 @@ class OBJECT_OT_shaders (get_operator()):
     base = join(get_texture_dir(context), avatar)
     texture_dir = join(base, 'Textures')
     material_dir = join(base, 'Materials')
-    a, b, c, d, _, _ = listdir(material_dir)[0].split('_')
+    a, b, c, d, _, _ = max(listdir(material_dir), key = len).split('_')
     file_prefix = f'{ a }_{ b }_{ c }_{ d }'
     body_type = b
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
     json_path_prefix = f'{ material_dir }/{ file_prefix }'
     material_config = init_material_config(body_type, image_path_prefix)
     _material_config = add_material_patch(material_config, avatar, image_path_prefix)
-    init_materials(armature, material_path, _material_config)
-    global_shadow_config = init_global_shadow_config()
-    _global_shadow_config = add_global_shadow_patch(global_shadow_config, avatar)
-    init_global_shadow(_global_shadow_config, armature, head_origin_name, material_path)
-    outline_material_config = init_outline_material_config(avatar, json_path_prefix)
+    init_materials(avatar, armature, material_path, _material_config)
+    global_shadow_config = init_global_shadow_config(armature)
+    _global_shadow_config = add_global_shadow_patch(armature, global_shadow_config, avatar)
+    init_global_shadow(_global_shadow_config, armature, head_origin_name, material_path, avatar)
+    outline_material_config = init_outline_material_config(json_path_prefix, _global_shadow_config)
     _outline_material_config = add_outline_patch(outline_material_config, avatar, json_path_prefix)
     init_outlines(_outline_material_config, outline_path, avatar)
     init_post_processing(post_processing_path)

@@ -4,8 +4,8 @@ strategies = {
   'Furina/Default': Furina
 }
 
-def add_global_shadow_patch (config, avatar):
+def add_global_shadow_patch (armature, config, avatar):
   if avatar in strategies:
-    strategies[avatar](config)
+    strategies[avatar](armature, config)
 
   return config

@@ -34,9 +34,9 @@ def update_nodes_modifier (config, is_weapon, weapon_mesh):
       modifier[slot] = get_material(material_prefix + material_suffix)
       modifier[slot2] = get_material(outline_material_prefix + outline_material_suffix)
     
-def add_nodes_modifier (config, is_weapon, weapon_mesh):
+def add_nodes_modifier (config, is_weapon, weapon_mesh, avatar_or_weapon):
   outline_slots = config['outline_slots']
-  node_group = get_data().node_groups.get("HoYoverse - Genshin Impact Outlines")
+  node_group = get_data().node_groups.get(f"HoYoverse - Genshin Impact Outlines_{ avatar_or_weapon }")
   modifier_name = 'Nodes Modifier For Outlines'
 
   for mesh_name, config in outline_slots.items():
@@ -168,11 +168,11 @@ def init_outlines (
   is_weapon = False, 
   weapon_mesh = None
 ):
-  append_node_tree(outline_path)
+  append_node_tree(outline_path, None, f'HoYoverse - Genshin Impact Outlines_{ avatar_or_weapon }')
   gen_outline_materials(config)
   init_outline_materials(config)
   init_outline_color(config, is_weapon)
-  add_nodes_modifier(config, is_weapon, weapon_mesh)
+  add_nodes_modifier(config, is_weapon, weapon_mesh, avatar_or_weapon)
   update_nodes_modifier(config, is_weapon, weapon_mesh)
   rename_materials(avatar_or_weapon)
   

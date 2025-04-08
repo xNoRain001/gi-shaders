@@ -1,4 +1,4 @@
-from .utils import add_mesh_name
+from .utils import add_meshes
 
-def Furina (config):
-  add_mesh_name(config, 'EffectHair')
+def Furina (armature, config):
+  add_meshes(armature, config, 'EffectHair')

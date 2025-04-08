@@ -84,7 +84,7 @@ class OBJECT_OT_weapon_shaders (get_operator()):
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
     json_path = f'{ material_dir }/{ file_prefix }Mat.json'
     config = init_weapon_material_config(image_path_prefix)
-    init_materials(weapon_mesh, weapon_path, config, True)
+    init_materials(weapon, weapon_mesh, weapon_path, config, True)
     weapon_outline_material_config = init_weapon_outline_material_config(image_path_prefix, json_path)
     init_outlines(weapon_outline_material_config, outline_path, weapon, True, weapon_mesh)
     
