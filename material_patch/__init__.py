@@ -1,13 +1,15 @@
+from .Xiao import Xiao
 from .Furina import Furina
 from .Nahida import Nahida
-from .Xiao import Xiao
 from .Lynette import Lynette
+from .Mavuika import Mavuika
 
 strategies = {
+  'Xiao/Default': Xiao,
   'Furina/Default': Furina,
   'Nahida/Default': Nahida,
-  'Xiao/Default': Xiao,
   'Lynette/Default': Lynette,
+  'Mavuika/Default': Mavuika,
 }
 
 def add_material_patch (config, avatar, image_path_prefix):

@@ -9,20 +9,24 @@ def link_post_processing (node_tree):
 
   return node_tree
 
-def init_compositor ():
-  node_tree = get_data().node_groups.get('HoYoverse - Post Processing')
+def init_compositor (node_tree):
   scene = get_context().scene
   scene.use_nodes = True
   _node_tree = scene.node_tree
-  _node_tree.nodes.new(type='CompositorNodeGroup').node_tree = node_tree
+  _node_tree.nodes.new(type = 'CompositorNodeGroup').node_tree = node_tree
 
   return _node_tree
 
 def init_post_processing (post_processing_path):
-  if get_data().node_groups.get('HoYoverse - Post Processing'):
+  node_groups = get_data().node_groups
+  node_group_name = 'HoYoverse - Post Processing'
+  post_node_tree = node_groups.get(node_group_name)
+
+  if post_node_tree:
     return
   
   append_node_tree(post_processing_path)
-  node_tree = init_compositor()
+  post_node_tree = node_groups.get(node_group_name)
+  node_tree = init_compositor(post_node_tree)
   link_post_processing(node_tree)
   get_context().scene.view_settings.view_transform = 'Standard'

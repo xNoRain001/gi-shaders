@@ -43,10 +43,10 @@ def run_checker (self, context):
 
     return passing
   
-  def check_head_origin_name ():
+  def check_head_origin ():
     passing = True
 
-    if not head_origin_name:
+    if not head_origin:
       passing = False
       report_error(self, '脸部阴影跟随骨骼不存在')
 
@@ -55,12 +55,12 @@ def run_checker (self, context):
   scene = context.scene
   avatar = scene.avatar
   armature = scene.armature
-  head_origin_name = scene.head_origin_name
+  head_origin = scene.head_origin
   passing = True
   checkers = [
     check_avatar, 
     check_armature, 
-    check_head_origin_name
+    check_head_origin
   ]
 
   for checker in checkers:
@@ -89,23 +89,45 @@ class OBJECT_OT_shaders (get_operator()):
     scene = context.scene
     avatar = scene.avatar
     armature = scene.armature
-    head_origin_name = scene.head_origin_name
-    base = join(get_texture_dir(context), avatar)
-    texture_dir = join(base, 'Textures')
-    material_dir = join(base, 'Materials')
-    a, b, c, d, _, _ = max(listdir(material_dir), key = len).split('_')
-    file_prefix = f'{ a }_{ b }_{ c }_{ d }'
-    body_type = b
+    head_origin = scene.head_origin
+    avatar_dir = join(get_texture_dir(context), avatar)
+    texture_dir = join(avatar_dir, 'Textures')
+    material_dir = join(avatar_dir, 'Materials')
+    # Avatar_Boy_Sword_PlayerBoy_Mat_Face.json
+    model_type, body_type, weapon_type, avatar_name, _, _ = \
+      max(listdir(material_dir), key = len).split('_')
+    file_prefix = f'{ model_type }_{ body_type }_{ weapon_type }_{ avatar_name }'
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
     json_path_prefix = f'{ material_dir }/{ file_prefix }'
     material_config = init_material_config(body_type, image_path_prefix)
-    _material_config = add_material_patch(material_config, avatar, image_path_prefix)
+    _material_config = add_material_patch(
+      material_config, 
+      avatar, 
+      image_path_prefix
+    )
     init_materials(avatar, armature, material_path, _material_config)
     global_shadow_config = init_global_shadow_config(armature)
-    _global_shadow_config = add_global_shadow_patch(armature, global_shadow_config, avatar)
-    init_global_shadow(_global_shadow_config, armature, head_origin_name, material_path, avatar)
-    outline_material_config = init_outline_material_config(json_path_prefix, _global_shadow_config)
-    _outline_material_config = add_outline_patch(outline_material_config, avatar, json_path_prefix)
+    _global_shadow_config = add_global_shadow_patch(
+      armature, 
+      global_shadow_config, 
+      avatar
+    )
+    init_global_shadow(
+      _global_shadow_config, 
+      armature, 
+      head_origin, 
+      material_path, 
+      avatar
+    )
+    outline_material_config = init_outline_material_config(
+      json_path_prefix, 
+      _global_shadow_config
+    )
+    _outline_material_config = add_outline_patch(
+      outline_material_config, 
+      avatar, 
+      json_path_prefix
+    )
     init_outlines(_outline_material_config, outline_path, avatar)
     init_post_processing(post_processing_path)
 

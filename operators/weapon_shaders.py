@@ -76,16 +76,25 @@ class OBJECT_OT_weapon_shaders (get_operator()):
     weapon = scene.weapon
     weapon_type = scene.weapon_type
     weapon_mesh = scene.weapon_mesh
-    base = join(get_weapon_texture_dir(context), weapon_type, weapon)
-    texture_dir = join(base, 'Textures')
-    material_dir = join(base, 'Materials')
+    weapon_dir = join(get_weapon_texture_dir(context), weapon_type, weapon)
+    texture_dir = join(weapon_dir, 'Textures')
+    material_dir = join(weapon_dir, 'Materials')
     segments = listdir(material_dir)[0].split('_')
     file_prefix = f'{ segments[0] }_{ segments[1] }_{ segments[2] }_'
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
     json_path = f'{ material_dir }/{ file_prefix }Mat.json'
     config = init_weapon_material_config(image_path_prefix)
     init_materials(weapon, weapon_mesh, weapon_path, config, True)
-    weapon_outline_material_config = init_weapon_outline_material_config(image_path_prefix, json_path)
-    init_outlines(weapon_outline_material_config, outline_path, weapon, True, weapon_mesh)
+    weapon_outline_material_config = init_weapon_outline_material_config(
+      image_path_prefix, 
+      json_path
+    )
+    init_outlines(
+      weapon_outline_material_config, 
+      outline_path, 
+      weapon, 
+      True, 
+      weapon_mesh
+    )
     
     return {'FINISHED'}
