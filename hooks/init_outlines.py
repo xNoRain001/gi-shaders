@@ -142,11 +142,11 @@ def init_outline_color (config, is_weapon):
     inputs = material.node_tree.nodes["Outlines"].inputs
 
     if is_weapon:
-      inputs[17].default_value = (r, g, b, a)
-      inputs[18].default_value = (r2, g2, b2, a2)
-      inputs[19].default_value = (r3, g3, b3, a3)
-      inputs[20].default_value = (r4, g4, b4, a4)
-      inputs[21].default_value = (r5, g5, b5, a5)
+      inputs[18].default_value = (r, g, b, a)
+      inputs[19].default_value = (r2, g2, b2, a2)
+      inputs[20].default_value = (r3, g3, b3, a3)
+      inputs[21].default_value = (r4, g4, b4, a4)
+      inputs[22].default_value = (r5, g5, b5, a5)
     else:
       inputs[15].default_value = (r, g, b, a)
       inputs[16].default_value = (r2, g2, b2, a2)

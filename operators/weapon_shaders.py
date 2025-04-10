@@ -7,6 +7,8 @@ from ..config import (
   init_weapon_material_config, 
   init_weapon_outline_material_config, 
 )
+from ..weapon_outline_patch import add_weapon_outline_patch
+from ..weapon_material_patch import add_weapon_material_patch
 from ..hooks import init_dissolve, init_materials, init_outlines
 
 dir = dirname(abspath(__file__))
@@ -83,15 +85,22 @@ class OBJECT_OT_weapon_shaders (get_operator()):
     segments = listdir(material_dir)[0].split('_')
     file_prefix = f'{ segments[0] }_{ segments[1] }_{ segments[2] }_'
     image_path_prefix = f'{ texture_dir }/{ file_prefix }'
+    json_path_prefix = f'{ material_dir }/{ file_prefix }'
     json_path = f'{ material_dir }/{ file_prefix }Mat.json'
     config = init_weapon_material_config(image_path_prefix)
-    init_materials(weapon, weapon_mesh, weapon_path, config, True)
+    _config = add_weapon_material_patch(config, weapon, image_path_prefix)
+    init_materials(weapon, weapon_mesh, weapon_path, _config, True)
     weapon_outline_material_config = init_weapon_outline_material_config(
       image_path_prefix, 
       json_path
     )
-    init_outlines(
+    _weapon_outline_material_config = add_weapon_outline_patch(
       weapon_outline_material_config, 
+      weapon, 
+      json_path_prefix
+    )
+    init_outlines(
+      _weapon_outline_material_config, 
       outline_path, 
       weapon, 
       True, 
