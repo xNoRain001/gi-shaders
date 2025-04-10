@@ -1,5 +1,5 @@
 from os import listdir
-from os.path import join,  exists, abspath, dirname
+from os.path import join, exists, abspath, dirname
 from ..libs.blender_utils import get_operator, report_error
 
 from ..utisl import get_weapon_texture_dir
@@ -7,12 +7,13 @@ from ..config import (
   init_weapon_material_config, 
   init_weapon_outline_material_config, 
 )
-from ..hooks import init_materials, init_outlines
+from ..hooks import init_dissolve, init_materials, init_outlines
 
 dir = dirname(abspath(__file__))
 prefix = '../assets/shaders/HoYoverse - Genshin Impact '
 outline_path = join(dir, f'{ prefix }Outlines v3.blend')
 weapon_path = join(dir, f'{ prefix }Weapons - Goo Engine v3.blend')
+dissolve_path = join(dir, f'{ prefix }Weapon Dissolve.blend')
 
 def run_checker (self, context):
   def check_weapon ():
@@ -96,5 +97,6 @@ class OBJECT_OT_weapon_shaders (get_operator()):
       True, 
       weapon_mesh
     )
+    init_dissolve(dissolve_path, weapon, weapon_mesh)
     
     return {'FINISHED'}

@@ -1,5 +1,5 @@
-from os.path import exists
-from ..libs.blender_utils import get_data, get_material
+from os.path import exists, basename
+from ..libs.blender_utils import get_data, get_material, update_view
 
 from ..const import material_prefix
 
@@ -49,11 +49,16 @@ def get_node (avatar_or_weapon, data, body_type, node_name, image_type):
   return node
 
 def _node_set_image (data, node, image_path, image_type):
-  image = data.images.load(image_path)
-  image.alpha_mode = 'CHANNEL_PACKED'
+  images = get_data().images
+  image_name = basename(image_path)
+  local_image = images.get(image_name)
+  image = local_image if local_image else data.images.load(image_path)
 
-  if image_type == 'lightmap' or image_type == 'normalmap':
-    image.colorspace_settings.name = 'Non-Color'
+  if not local_image:
+    image.alpha_mode = 'CHANNEL_PACKED'
+
+    if image_type == 'lightmap' or image_type == 'normalmap':
+      image.colorspace_settings.name = 'Non-Color'
 
   node.image = image
 
